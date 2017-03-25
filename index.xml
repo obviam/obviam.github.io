@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Obviam - Game Development Tutorials and Musings in Software Development</title>
+    <link>https://obviam.github.io/index.xml</link>
+    <description>Recent content on Obviam - Game Development Tutorials and Musings in Software Development</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 24 Mar 2017 12:58:51 +0000</lastBuildDate>
+    <atom:link href="https://obviam.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>.plan</title>
+      <link>https://obviam.github.io/plan/</link>
+      <pubDate>Fri, 24 Mar 2017 12:58:51 +0000</pubDate>
+      
+      <guid>https://obviam.github.io/plan/</guid>
+      <description>
+
+&lt;h2 id=&#34;these-are-the-things-i-am-currently-working-on&#34;&gt;These are the things I am currently working on:&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;To be announced&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Archive</title>
+      <link>https://obviam.github.io/archive-tmp/</link>
+      <pubDate>Fri, 24 Mar 2017 12:58:51 +0000</pubDate>
+      
+      <guid>https://obviam.github.io/archive-tmp/</guid>
+      <description>&lt;p&gt;I am currently porting my old blog to the new format and doing a lot of housekeeping.&lt;/p&gt;
+
+&lt;p&gt;The archive will contain the not so relevant articles I wrote.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Blog</title>
+      <link>https://obviam.github.io/blog-tmp/</link>
+      <pubDate>Fri, 24 Mar 2017 12:58:51 +0000</pubDate>
+      
+      <guid>https://obviam.github.io/blog-tmp/</guid>
+      <description>&lt;p&gt;I am currently porting my old blog to the new format and doing a lot of housekeeping.&lt;/p&gt;
+
+&lt;p&gt;Many articles that are not relevant, will go to the &lt;a href=&#34;https://obviam.github.io/archive-tmp/&#34;&gt;Archive&lt;/a&gt; archive section.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>About Me</title>
+      <link>https://obviam.github.io/about/</link>
+      <pubDate>Sat, 03 Jul 2010 12:58:51 +0000</pubDate>
+      
+      <guid>https://obviam.github.io/about/</guid>
+      <description>&lt;p&gt;I am a guy who loves games and because I ended up as a software developer thinking that I will build great games for a living, I decided to start this experiment to motivate myself and hopefully others with similar interests to start doing what I love: COMPUTER GAMES.&lt;/p&gt;
+
+&lt;p&gt;When I started the website in 2010, I didn&amp;rsquo;t know much about game development and decided to start researching it and documenting the steps I was taking. The mobile platform, especially Android seemed the most accessible and I started learning.&lt;/p&gt;
+
+&lt;p&gt;Since then, I have worked at a couple of game studios and consulted in a few small projects, and I must say I have learnt a LOT and met some great people.&lt;/p&gt;
+
+&lt;p&gt;I signed the posts and code as &lt;em&gt;Impaler&lt;/em&gt;. Why the name &lt;em&gt;Impaler&lt;/em&gt;? Originally I come from Transylvania and I currently live in London. It was also the name I was using on many game servers and using it makes me feel 16 again. My real name is Tamas Jano.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;Obviam&lt;/em&gt;&lt;/strong&gt; means &lt;strong&gt;&lt;em&gt;against&lt;/em&gt;&lt;/strong&gt; in Latin. Why &lt;strong&gt;&lt;em&gt;against&lt;/em&gt;&lt;/strong&gt;? Because I am against corporate crap and I am against the thought that work can&amp;rsquo;t be fun and I am doing this experiment against many odds. The fun is just beginning, usually after work and when everyone is asleep.&lt;/p&gt;
+
+&lt;p&gt;To contact me use email to tamas (at) this domain dot net.&lt;/p&gt;
+
+&lt;p&gt;Updated Mar 2017&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
