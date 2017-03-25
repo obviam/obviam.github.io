@@ -31,11 +31,13 @@ nav {
 
 
 h1,h2,h3,h4,h5,h6 {
-	font-family: 'Concert One', cursive;
+	font-family: 'Source Code Pro', monospace;
+	font-weight: bold;
 }
 
 #user-name {
-	font-size: 5em;
+	font-size: 4em;
+	font-weight: bold;
 }
 
 .user-description {
