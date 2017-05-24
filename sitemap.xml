@@ -17,13 +17,63 @@
   </url>
   
   <url>
+    <loc>https://obviam.github.io/archive/2016/01/28/libgdx-and-kotlin---classes-2d-platformer-prototyping/</loc>
+    <lastmod>2016-01-28T20:29:18+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://obviam.github.io/archive/libgdx-and-kotlin</loc>
+    <lastmod>2016-01-21T12:31:43+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://obviam.github.io/about/</loc>
     <lastmod>2010-07-03T12:58:51+00:00</lastmod>
   </url>
   
   <url>
+    <loc>https://obviam.github.io/archive/</loc>
+    <lastmod>2016-01-28T20:29:18+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://obviam.github.io/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://obviam.github.io/tags/kotlin/</loc>
+    <lastmod>2016-01-28T20:29:18+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://obviam.github.io/categories/kotlin/</loc>
+    <lastmod>2016-01-28T20:29:18+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://obviam.github.io/tags/libgdx/</loc>
+    <lastmod>2016-01-28T20:29:18+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://obviam.github.io/categories/libgdx/</loc>
+    <lastmod>2016-01-28T20:29:18+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://obviam.github.io/</loc>
     <lastmod>2017-03-24T12:58:51+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://obviam.github.io/tags/</loc>
     <priority>0</priority>
   </url>
   

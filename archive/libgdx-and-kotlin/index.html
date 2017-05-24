@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> libGDX and Kotlin &middot; Obviam - Game Development Tutorials and Musings in Software Development </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.13" />
+
+
+<script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://obviam.github.io/css/nix.css">
+
+ 
+<link href="https://fonts.googleapis.com/css?family=Inconsolata|Open+Sans|Roboto|Montserrat|Concert+One|Source+Code+Pro:400,700" rel="stylesheet">
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-17403436-1', 'auto');
+	  ga('send', 'pageview');
+
+</script>
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" id="green-terminal" href=https://obviam.github.io/>impaler@obviam.net ~ $</a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href="https://obviam.github.io/">/home/impaler</a>
+				</li>
+				
+				
+				<li >
+					<a href="/blog-tmp">~/blog</a>
+				</li>
+				
+				
+				<li >
+					<a href="/plan">~/.plan</a>
+				</li>
+				
+				
+				<li >
+					<a href="/archive">~/archive</a>
+				</li>
+				
+				
+				<li >
+					<a href="/about">~/about</a>
+				</li>
+				
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="container wrapper">
+            <h1><a href="https://obviam.github.io/archive/libgdx-and-kotlin">libGDX and Kotlin</a></h1>
+            <span class="post-date">Jan 21, 2016 </span>
+            <div class="post-content">
+                <h1 id="using-libgdx-with-kotlin">Using libGDX with Kotlin</h1>
+
+<p>I’ve been reading lately about different languages and what they can bring to the already crowded table of software developers, and one language stood out for me: Kotlin. (<a href="https://kotlinlang.org/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','kotlinlang.org']);" title="Kotlin"><a href="https://kotlinlang.org/">https://kotlinlang.org/</a></a>)</p>
+
+<p>It’s a relatively new language (est. 2011) and these are just a few reasons why I picked it over the multitude of other more mature languages:</p>
+
+<ul>
+<li>Runs on the JVM and has full Java interoperability</li>
+<li>It’s neither a pure OO nor functional language, it accommodates both styles naturally</li>
+<li>It supports procedural programming with the use of functions</li>
+<li>It has type inference and support for both nullable and non-nullable datatypes</li>
+<li>Its syntax is lovely, especially the Pascal style variable declarations (data types come after the variables)</li>
+<li>It is very concise and I found code written in Kotlin to be very readable</li>
+</ul>
+
+<p></p>
+
+<h2 id="setting-up-the-project">Setting up the project</h2>
+
+<p>I will be using the standard libGdx setup as recommended and described in the wiki (<a href="https://github.com/libgdx/libgdx/wiki/Project-Setup-Gradle" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','github.com']);"><a href="https://github.com/libgdx/libgdx/wiki/Project-Setup-Gradle">https://github.com/libgdx/libgdx/wiki/Project-Setup-Gradle</a></a>), with Gradle as my build tool and IntelliJ as my IDE.</p>
+
+<p>I will call my project <strong>Nemo</strong>, because it has no name and that&rsquo;s what <strong>“nemo”</strong> is in Latin (none, no one, nobody, no name). We will see where we go with it.</p>
+
+<p><a href="/images/archive/2016/01/Screen-Shot-2016-01-19-at-13.49.30.png"><img src="/images/archive/2016/01/Screen-Shot-2016-01-19-at-13.49.30.png" alt="Nemo - libgdx project setup" width="500" /></a></p>
+
+<p>Once the project is created, import it into your IDE. Usually importing/opening the <code>build.gradle</code> file from the root project root.</p>
+
+<p><a href="/images/archive/2016/01/Screen-Shot-2016-01-19-at-13.53.02.png"><img src="/images/archive/2016/01/Screen-Shot-2016-01-19-at-13.53.02.png" alt="Nemo -IntelliJ" width="500" /></a></p>
+
+<p>After the project has been imported, upgrade libGdx. The latest setup tool contains the latest versions, but to do it manually, open the root <code>build.gradle</code> file where all the dependencies are defined and use the latest version of libGdx.</p>
+
+<p>The latest versions can be found here: <a href="https://libgdx.badlogicgames.com/versions.html">https://libgdx.badlogicgames.com/versions.html</a></p>
+
+<p><a href="/images/archive/2016/01/Screen-Shot-2016-01-19-at-13.52.28.png"><img src="/images/archive/2016/01/Screen-Shot-2016-01-19-at-13.52.28.png" alt="Nemo - build.gradle" width="426" height="377" /></a></p>
+
+<p>Change the gdxVersion to the latest, currently this is 1.8.0.</p>
+
+<p>Also make sure that your IDE is ready for Kotlin.</p>
+
+<p>To set up IntelliJ, follow the instructions here: <a href="https://kotlinlang.org/docs/tutorials/getting-started.html" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','kotlinlang.org']);" title="Setting up IntelliJ" target="_blank"><a href="https://kotlinlang.org/docs/tutorials/getting-started.html">https://kotlinlang.org/docs/tutorials/getting-started.html</a></a></p>
+
+<p><strong>Note:</strong> To upgrade the plugin to a more recent version of Kotlin, the only way I managed to do it, is to uninstall the plugin and re-add it.</p>
+
+<p>For eclipse users, the instructions are here: <a href="https://kotlinlang.org/docs/tutorials/getting-started-eclipse.html" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','kotlinlang.org']);" title="Setting up Eclipse" target="_blank"><a href="https://kotlinlang.org/docs/tutorials/getting-started-eclipse.html">https://kotlinlang.org/docs/tutorials/getting-started-eclipse.html</a></a></p>
+
+<p>Because we are using Gradle as our build tool, we need to configure it to use the kotlin plugin to build the project. To do this, the <code>kotlin-gradle</code> plugin dependency needs to be added to the <code>buildscript</code> method found in the main <code>build.gralde</code> file.</p>
+
+<p>Add the line</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span>classpath <span style="color: #4070a0">&#39;org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0-beta-4584&#39;</span>
+</pre></div>
+
+<p>to the <code>buildscript</code> dependencies in the main <code>build.gradle</code> file.</p>
+
+<p>The root <code>build.gradle</code> file should contain something like this</p>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 1 </span>buildscript {
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 2 </span>   repositories {
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 3 </span>       mavenCentral()
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 4 </span>       maven { url <span style="color: #4070a0">&quot;https://oss.sonatype.org/content/repositories/snapshots/&quot;</span> }
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 5 </span>   }
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 6 </span>   dependencies {
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 7 </span>       classpath <span style="color: #4070a0">&quot;com.android.tools.build:gradle:1.2.3&quot;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 8 </span>       classpath <span style="color: #4070a0">&quot;org.robovm:robovm-gradle-plugin:1.12.0&quot;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 9 </span><span style="background-color: #ffffcc">       classpath <span style="color: #4070a0">&quot;org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0-beta-4584&quot;</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">10 </span>   }
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">11 </span>}
+</pre></div>
+
+
+<p>The version number can be obtained from Kotlin’s repository at maven central.</p>
+
+<p><a href="http://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-gradle-plugin" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','mvnrepository.com']);" title="Kotlin Gradle Plugin" target="_blank"><a href="http://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-gradle-plugin">http://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-gradle-plugin</a></a></p>
+
+<p>More information on how to use Kotlin with Gradle can be found here: <a href="https://kotlinlang.org/docs/reference/using-gradle.html" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','kotlinlang.org']);" title="https://kotlinlang.org/docs/reference/using-gradle.html" target="_blank"><a href="https://kotlinlang.org/docs/reference/using-gradle.html">https://kotlinlang.org/docs/reference/using-gradle.html</a></a></p>
+
+<p>In order to target the JVM, the Kotlin plugin needs to be applied.</p>
+
+<p>Add</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span>apply <span style="color: #002070; font-weight: bold">plugin:</span> <span style="color: #4070a0">&quot;kotlin&quot;</span>
+</pre></div>
+
+<p>to the “<strong>core</strong>” project, because we are going to use Kotlin just in the “<strong>core</strong>”.</p>
+
+<p>The Kotlin standard library also needs to be added to the core dependencies.</p>
+
+<pre class="brush: groovy;">compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+</pre>
+
+<p><strong>Note:</strong> <code>kotlinVersion</code> is defined at the project level in <code>allProjects.ext</code>.</p>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 1 </span>allprojects <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 2 </span>   apply <span style="color: #002070; font-weight: bold">plugin:</span> <span style="color: #4070a0">&quot;eclipse&quot;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 3 </span>   apply <span style="color: #002070; font-weight: bold">plugin:</span> <span style="color: #4070a0">&quot;idea&quot;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 4 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 5 </span>   version <span style="color: #666666">=</span> <span style="color: #4070a0">&#39;1.0&#39;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 6 </span>   ext <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 7 </span>       appName <span style="color: #666666">=</span> <span style="color: #4070a0">&quot;nemo&quot;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 8 </span>       gdxVersion <span style="color: #666666">=</span> <span style="color: #4070a0">&#39;1.8.0&#39;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 9 </span>       roboVMVersion <span style="color: #666666">=</span> <span style="color: #4070a0">&#39;1.12.0&#39;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">10 </span>       box2DLightsVersion <span style="color: #666666">=</span> <span style="color: #4070a0">&#39;1.4&#39;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">11 </span>       ashleyVersion <span style="color: #666666">=</span> <span style="color: #4070a0">&#39;1.7.0&#39;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">12 </span>       aiVersion <span style="color: #666666">=</span> <span style="color: #4070a0">&#39;1.7.0&#39;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">13 </span><span style="background-color: #ffffcc">       kotlinVersion <span style="color: #666666">=</span> <span style="color: #4070a0">&#39;1.0.0-beta-4584&#39;</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">14 </span>   <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">15 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">16 </span>   repositories <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">17 </span>       mavenCentral<span style="color: #666666">()</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">18 </span>       maven <span style="color: #666666">{</span> url <span style="color: #4070a0">&quot;https://oss.sonatype.org/content/repositories/snapshots/&quot;</span> <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">19 </span>       maven <span style="color: #666666">{</span> url <span style="color: #4070a0">&quot;https://oss.sonatype.org/content/repositories/releases/&quot;</span> <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">20 </span>   <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">21 </span><span style="color: #666666">}</span>
+</pre></div>
+
+
+<p>For the latest version please consult the Kotlin website.</p>
+
+<p>The core project setup should look like this:</p>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 1 </span>project(<span style="color: #4070a0">&quot;:core&quot;</span>) {
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 2 </span>   apply plugin: <span style="color: #4070a0">&quot;java&quot;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 3 </span><span style="background-color: #ffffcc">   apply plugin: <span style="color: #4070a0">&quot;kotlin&quot;</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 4 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 5 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 6 </span>   dependencies {
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 7 </span>       compile <span style="color: #4070a0">&quot;com.badlogicgames.gdx:gdx:$gdxVersion&quot;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 8 </span>       compile <span style="color: #4070a0">&quot;com.badlogicgames.gdx:gdx-box2d:$gdxVersion&quot;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 9 </span>       compile <span style="color: #4070a0">&quot;com.badlogicgames.gdx:gdx-freetype:$gdxVersion&quot;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">10 </span><span style="background-color: #ffffcc">       compile <span style="color: #4070a0">&quot;org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion&quot;</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">11 </span>   }
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">12 </span>}
+</pre></div>
+
+
+<p><strong>Note:</strong> the highlighted lines contain the changes.</p>
+
+<p>Kotlin can be mixed with Java, and because the plan is to use only Kotlin, we won’t extract the Kotlin sources into different directories, instead we will gradually convert the current Java ones to Kotlin.</p>
+
+<p>Luckily we have only one class to convert.</p>
+
+<p>We can do it in a few ways. If you are using IntelliJ, the easiest way is to select the class, from the <strong>Tools</strong> menu, and select <strong>Convert Java file to Kotlin file</strong>.</p>
+
+<p>There are other ways too, for instance create an empty file with the <code>.kt</code> extension, copy the content of the Java file and paste it into the new <code>.kt</code> file. IntelliJ will prompt you to convert it.</p>
+
+<p>Of course, all this is possible only if the Kotlin plugin is installed and enabled.</p>
+
+<p>Let’s examine the <code>Nemo</code> class file, which is generated by the gdx setup app:</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.nemo</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">com.badlogic.gdx.ApplicationAdapter</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">com.badlogic.gdx.Gdx</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">com.badlogic.gdx.graphics.GL20</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">com.badlogic.gdx.graphics.Texture</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">com.badlogic.gdx.graphics.g2d.SpriteBatch</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Nemo</span> <span style="color: #007020; font-weight: bold">extends</span> ApplicationAdapter <span style="color: #666666">{</span>
+  SpriteBatch batch<span style="color: #666666">;</span>
+  Texture img<span style="color: #666666">;</span>
+ 
+  <span style="color: #555555; font-weight: bold">@Override</span>
+  <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">create</span> <span style="color: #666666">()</span> <span style="color: #666666">{</span>
+     batch <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> SpriteBatch<span style="color: #666666">();</span>
+     img <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Texture<span style="color: #666666">(</span><span style="color: #4070a0">&quot;badlogic.jpg&quot;</span><span style="color: #666666">);</span>
+  <span style="color: #666666">}</span>
+
+  <span style="color: #555555; font-weight: bold">@Override</span>
+  <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">render</span> <span style="color: #666666">()</span> <span style="color: #666666">{</span>
+     Gdx<span style="color: #666666">.</span><span style="color: #4070a0">gl</span><span style="color: #666666">.</span><span style="color: #4070a0">glClearColor</span><span style="color: #666666">(</span><span style="color: #40a070">1</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">1</span><span style="color: #666666">);</span>
+     Gdx<span style="color: #666666">.</span><span style="color: #4070a0">gl</span><span style="color: #666666">.</span><span style="color: #4070a0">glClear</span><span style="color: #666666">(</span>GL20<span style="color: #666666">.</span><span style="color: #4070a0">GL_COLOR_BUFFER_BIT</span><span style="color: #666666">);</span>
+     batch<span style="color: #666666">.</span><span style="color: #4070a0">begin</span><span style="color: #666666">();</span>
+     batch<span style="color: #666666">.</span><span style="color: #4070a0">draw</span><span style="color: #666666">(</span>img<span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">);</span>
+     batch<span style="color: #666666">.</span><span style="color: #4070a0">end</span><span style="color: #666666">();</span>
+  <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>and the generated Kotlin file:</p>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 1 </span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.nemo</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 2 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 3 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">com.badlogic.gdx.ApplicationAdapter</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 4 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">com.badlogic.gdx.Gdx</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 5 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">com.badlogic.gdx.graphics.GL20</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 6 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">com.badlogic.gdx.graphics.Texture</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 7 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">com.badlogic.gdx.graphics.g2d.SpriteBatch</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 8 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 9 </span><span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Nemo</span> : ApplicationAdapter() {
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">10 </span><span style="background-color: #ffffcc">   <span style="color: #007020; font-weight: bold">internal</span> <span style="color: #007020; font-weight: bold">var</span> batch: SpriteBatch
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">11 </span><span style="background-color: #ffffcc">   <span style="color: #007020; font-weight: bold">internal</span> <span style="color: #007020; font-weight: bold">var</span> img: Texture
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">12 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">13 </span>   <span style="color: #007020; font-weight: bold">override</span> <span style="color: #007020; font-weight: bold">fun</span> <span style="color: #06287e">create</span>() {
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">14 </span>       batch = SpriteBatch()
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">15 </span>       img = Texture(<span style="color: #4070a0">&quot;badlogic.jpg&quot;</span>)
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">16 </span>   }
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">17 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">18 </span>   <span style="color: #007020; font-weight: bold">override</span> <span style="color: #007020; font-weight: bold">fun</span> <span style="color: #06287e">render</span>() {
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">19 </span>       Gdx.gl.glClearColor(<span style="color: #40a070">1f</span>, <span style="color: #40a070">0f</span>, <span style="color: #40a070">0f</span>, <span style="color: #40a070">1f</span>)
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">20 </span>       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">21 </span>       batch.begin()
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">22 </span>       batch.draw(img, <span style="color: #40a070">0f</span>, <span style="color: #40a070">0f</span>)
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">23 </span>       batch.end()
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">24 </span>   }
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">25 </span>}
+</pre></div>
+
+
+<p>The automatic conversion is not perfect and if we compile the class we get two errors:</p>
+
+<pre><code>Error:(9, 4) Gradle: Property must be initialized or be abstract
+Error:(10, 4) Gradle: Property must be initialized or be abstract
+</code></pre>
+
+<p>The errors refer to the 2 uninitialised class properties in the highlighted lines (10 and 11).</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">internal</span> <span style="color: #007020; font-weight: bold">var</span> batch: SpriteBatch
+<span style="color: #007020; font-weight: bold">internal</span> <span style="color: #007020; font-weight: bold">var</span> img: Texture
+</pre></div>
+
+<p>In Kotlin, declared <code>non null</code> properties have to be initialised in the constructor or the class’s init method. But doing so, we won’t be using the libGdx lifecycle methods, so we can apply one Kotlin feature: the <strong>Late Initialized Properties</strong>. It is achieved by using the <code>lateinit</code> modifier.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">internal</span> <span style="color: #007020; font-weight: bold">lateinit</span> <span style="color: #007020; font-weight: bold">var</span> batch: SpriteBatch
+<span style="color: #007020; font-weight: bold">internal</span> <span style="color: #007020; font-weight: bold">lateinit</span> <span style="color: #007020; font-weight: bold">var</span> img: Texture
+</pre></div>
+
+<p>This marks the properties for late initialisation and any access to the properties before they’ve been initialised, will be signalled by a special exception.</p>
+
+<p>That’s it, we have our Kotlin libGdx project.</p>
+
+<p>We can build it and run it the usual way.</p>
+
+<p>The simplest way is to run it from the command line with the Gradle wrapper.</p>
+
+<p>In the project’s root, execute the following command (linux, OSX):</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span>  ./gradlew desktop:run
+</pre></div>
+
+<p>or on Windows</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span>  gradlew.bat desktop:run
+</pre></div>
+
+<p>or by following the instructions found in the wiki:</p>
+
+<p><a href="https://github.com/libgdx/libgdx/wiki/Project-Setup-Gradle">https://github.com/libgdx/libgdx/wiki/Project-Setup-Gradle</a></p>
+
+<p>The very familiar bootstrap screen should show up.</p>
+
+<p><a href="/images/archive/2016/01/Screen-Shot-2016-01-19-at-16.37.50.png"><img src="/images/archive/2016/01/Screen-Shot-2016-01-19-at-16.37.50-300x244.png" alt="Nemo - Running 1st screen" width="300" height="244" class="aligncenter size-medium wp-image-1503" /></a></p>
+
+<p>Next we will explore some common tasks in game development and how those can be achieved with Kotlin.</p>
+
+<div class="download">
+  <a href="https://github.com/obviam/kotlin-gdx-nemo/tree/v0.0.01" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','github.com']);" title="https://github.com/obviam/kotlin-gdx-nemo/tree/v0.0.01">Get the source code here</a>
+</div>
+            </div>
+            
+            <div class="post-comments">
+                
+            </div>
+            
+            <div class="push"></div>
+        </div>
+        <footer class="footer text-center">
+<p>Copyright &copy; 2017 obviam.net -
+<span class="credit">
+	Powered by 
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and 
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+    </body>

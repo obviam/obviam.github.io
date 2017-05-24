@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+	<head>
+		<title> Kotlin &middot; Obviam - Game Development Tutorials and Musings in Software Development </title>
+
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.13" />
+
+
+<script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://obviam.github.io/css/nix.css">
+
+ 
+<link href="https://fonts.googleapis.com/css?family=Inconsolata|Open+Sans|Roboto|Montserrat|Concert+One|Source+Code+Pro:400,700" rel="stylesheet">
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-17403436-1', 'auto');
+	  ga('send', 'pageview');
+
+</script>
+
+
+	</head>
+
+	<body>
+		<header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" id="green-terminal" href=https://obviam.github.io/>impaler@obviam.net ~ $</a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href="https://obviam.github.io/">/home/impaler</a>
+				</li>
+				
+				
+				<li >
+					<a href="/blog-tmp">~/blog</a>
+				</li>
+				
+				
+				<li >
+					<a href="/plan">~/.plan</a>
+				</li>
+				
+				
+				<li >
+					<a href="/archive">~/archive</a>
+				</li>
+				
+				
+				<li >
+					<a href="/about">~/about</a>
+				</li>
+				
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+		<div class="container wrapper">
+			<div class="row">
+				<div class="col-xs-12 text-center">
+					<h1 id=>Kotlin</h1>
+				</div>
+			</div>
+			<ul id="post-list">
+				
+				<li>
+					<div class="post-list-item">
+						<div class="post-header">
+							<h4 class="post-link"><a href="https://obviam.github.io/archive/2016/01/28/libgdx-and-kotlin---classes-2d-platformer-prototyping/">libgdx and Kotlin - Classes [2D Platformer Prototyping]</a></h4>
+							<h4 class="post-date">Jan 28, 2016</h4>
+						</div>
+						<div class="post-summary"><p><p>This post is a follow up of the <a href="/archive/libgdx-and-kotlin" title="libgdx and Kotlin">libgdx and Kotlin</a> post.</p>
+
+<p>I have decided to prototype a simple 2D platformer (along the lines of Star Assault from my early posts), but instead of Java, I am using and learning Kotlin along the way.</p>
+
+<p>For this tutorial, the project should be in its initial state from the previous post. A bare-bone libGdx Java project turned into a Kotlin project. We&rsquo;ll be jamming away in our main <code>Game.kt</code> file, formerly <code>Nemo.kt</code>.</p>
+
+<p>The project source for the initial state can be found <a href="https://github.com/obviam/kotlin-gdx-nemo/tree/v0.0.01" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','github.com']);" title="https://github.com/obviam/kotlin-gdx-nemo/tree/v0.0.01">here</a>.</p>
+
+<blockquote>
+<p>Kotlin doesn&rsquo;t require the file name to be the same as the class name, or even to be in the directory structure equivalent to the declared package.</p>
+</blockquote>
+
+<p>Without further ado, here&rsquo;s is the first change to the code.</p>
+
+<p></p></p></div>
+						<div class="post-list-footer text-center">
+							<a href="https://obviam.github.io/archive/2016/01/28/libgdx-and-kotlin---classes-2d-platformer-prototyping/">Read More</a>
+						</div>
+					</div>
+				</li>
+				
+				<li>
+					<div class="post-list-item">
+						<div class="post-header">
+							<h4 class="post-link"><a href="https://obviam.github.io/archive/libgdx-and-kotlin">libGDX and Kotlin</a></h4>
+							<h4 class="post-date">Jan 21, 2016</h4>
+						</div>
+						<div class="post-summary"><p><h1 id="using-libgdx-with-kotlin">Using libGDX with Kotlin</h1>
+
+<p>I’ve been reading lately about different languages and what they can bring to the already crowded table of software developers, and one language stood out for me: Kotlin. (<a href="https://kotlinlang.org/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','kotlinlang.org']);" title="Kotlin"><a href="https://kotlinlang.org/">https://kotlinlang.org/</a></a>)</p>
+
+<p>It’s a relatively new language (est. 2011) and these are just a few reasons why I picked it over the multitude of other more mature languages:</p>
+
+<ul>
+<li>Runs on the JVM and has full Java interoperability</li>
+<li>It’s neither a pure OO nor functional language, it accommodates both styles naturally</li>
+<li>It supports procedural programming with the use of functions</li>
+<li>It has type inference and support for both nullable and non-nullable datatypes</li>
+<li>Its syntax is lovely, especially the Pascal style variable declarations (data types come after the variables)</li>
+<li>It is very concise and I found code written in Kotlin to be very readable</li>
+</ul>
+
+<p></p></p></div>
+						<div class="post-list-footer text-center">
+							<a href="https://obviam.github.io/archive/libgdx-and-kotlin">Read More</a>
+						</div>
+					</div>
+				</li>
+				
+
+			</ul>
+			<div class="push"></div>
+		</div>
+		<footer class="footer text-center">
+<p>Copyright &copy; 2017 obviam.net -
+<span class="credit">
+	Powered by 
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and 
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+	</body>
+</html>
