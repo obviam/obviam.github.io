@@ -6,21 +6,27 @@
     <description>Recent content on Obviam - Game Development Tutorials and Musings in Software Development</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 24 Mar 2017 12:58:51 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 25 May 2017 12:58:51 +0000</lastBuildDate>
     <atom:link href="https://obviam.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>.plan</title>
       <link>https://obviam.github.io/plan/</link>
-      <pubDate>Fri, 24 Mar 2017 12:58:51 +0000</pubDate>
+      <pubDate>Thu, 25 May 2017 12:58:51 +0000</pubDate>
       
       <guid>https://obviam.github.io/plan/</guid>
       <description>
 
 &lt;h2 id=&#34;these-are-the-things-i-am-currently-working-on&#34;&gt;These are the things I am currently working on:&lt;/h2&gt;
 
+&lt;h4 id=&#34;2017&#34;&gt;2017&lt;/h4&gt;
+
+&lt;h5 id=&#34;may&#34;&gt;May&lt;/h5&gt;
+
 &lt;ul&gt;
-&lt;li&gt;To be announced&lt;/li&gt;
+&lt;li&gt;Migrating blog to new platform (Hugo) &lt;code&gt;[++........]&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Building a server with Kotlin &lt;code&gt;[+.........]&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Drafting plans for a game &lt;code&gt;[..........]&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>
