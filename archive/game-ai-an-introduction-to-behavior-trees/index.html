@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> Game AI - An Introduction to Behaviour Trees &middot; Obviam - Game Development Tutorials and Musings in Software Development </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.13" />
+
+
+<script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://obviam.github.io/css/nix.css">
+
+ 
+<link href="https://fonts.googleapis.com/css?family=Inconsolata|Open+Sans|Roboto|Montserrat|Concert+One|Source+Code+Pro:400,700" rel="stylesheet">
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-17403436-1', 'auto');
+	  ga('send', 'pageview');
+
+</script>
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" id="green-terminal" href=https://obviam.github.io/>impaler@obviam.net ~ $</a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href="https://obviam.github.io/">/home/impaler</a>
+				</li>
+				
+				
+				<li >
+					<a href="/blog-tmp">~/blog</a>
+				</li>
+				
+				
+				<li >
+					<a href="/plan">~/.plan</a>
+				</li>
+				
+				
+				<li >
+					<a href="/archive">~/archive</a>
+				</li>
+				
+				
+				<li >
+					<a href="/about">~/about</a>
+				</li>
+				
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="container wrapper">
+            <h1><a href="https://obviam.github.io/archive/game-ai-an-introduction-to-behavior-trees">Game AI - An Introduction to Behaviour Trees</a></h1>
+            <span class="post-date">Aug 5, 2014 </span>
+            <div class="post-content">
+                <p>Game AI is a very broad subject and while there is a lot of material out there, I didn&rsquo;t find something that introduces the concepts gently and at a slower, more understandable pace. This article will try to explain how to design a very simple but extendable AI system loosely based on the concept of Behaviour Trees.</p>
+
+<h2 id="what-is-ai">What is AI?</h2>
+
+<p>Artificial Intelligence is the human-like behaviour exhibited by the entities participating in the game. It&rsquo;s more the illusion of intelligence and thoughtful action performed by the entities than an actual intelligent reasoning driven behaviour. The goal is to try to fool the player into thinking that the other &#8220;intelligent&#8221; entities are controlled by humans and not by a machine. It&rsquo;s easier said than done, but we can use a lot of tricks to achieve some really good, seemingly random and &#8220;intelligent&#8221; behaviours.</p>
+
+<p></p>
+
+<h2 id="an-example-h3">An Example</h3></h2>
+
+<p>Before we jump right into the fun bit, let&rsquo;s draft up a plan of what we want to achieve. Again, I will use droids as an example. Imagine an arena where droids will battle it out amongst them and whichever droid is the last one standing is the winner.</p>
+
+<p>The arena will be a board and droids will be placed randomly on it. We&rsquo;ll make it a turn based game so we can follow the whole AI unfold, but it can be easily turned into a realtime game.</p>
+
+<p>The rules are simple:</p>
+
+<ul>
+<li>The board is a rectangle</li>
+<li>A droid can move one tile per turn in either direction to any of the adjacent unoccupied tiles</li>
+<li>A droid has a range and can fire at droids within its range</li>
+<li>The droids will have the usual attributes: damage they inflict and hit points</li>
+</ul>
+
+<p>For the sake of simplicity we will use very simple structures.</p>
+
+<p>The application will have a <code>Droid</code> class and a <code>Board</code> class. A droid will have the following attributes that define it:</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Droid</span> <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">final</span> String name<span style="color: #666666">;</span>
+    <span style="color: #902000">int</span> x<span style="color: #666666">;</span>
+    <span style="color: #902000">int</span> y<span style="color: #666666">;</span>
+    <span style="color: #902000">int</span> range<span style="color: #666666">;</span>
+    <span style="color: #902000">int</span> damage<span style="color: #666666">;</span>
+    <span style="color: #902000">int</span> health<span style="color: #666666">;</span>
+
+    Board board<span style="color: #666666">;</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">Droid</span><span style="color: #666666">(</span>String name<span style="color: #666666">,</span> <span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">,</span> <span style="color: #902000">int</span> health<span style="color: #666666">,</span> <span style="color: #902000">int</span> damage<span style="color: #666666">,</span> <span style="color: #902000">int</span> range<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">name</span> <span style="color: #666666">=</span> name<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">x</span> <span style="color: #666666">=</span> x<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">y</span> <span style="color: #666666">=</span> y<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">health</span> <span style="color: #666666">=</span> health<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">damage</span> <span style="color: #666666">=</span> damage<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">range</span> <span style="color: #666666">=</span> range<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">update</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #60a0b0; font-style: italic">// placeholder for each turn or tick</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #60a0b0; font-style: italic">/* ... */</span>
+    <span style="color: #60a0b0; font-style: italic">/* getters and setters and toString() */</span>
+    <span style="color: #60a0b0; font-style: italic">/* ... */</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>The <code>Droid</code> is just a simple pojo with a few attributes. The attributes are self explanatory but here&rsquo;s a short summary of them:</p>
+
+<ul>
+<li><code>name</code> - the unique name of the droid, can be used for ID as well.</li>
+
+<li><p><code>x</code> and <code>y</code> - the coordinates on the grid.</p>
+
+<ul>
+<li><code>health</code>, <code>damage</code> and <code>range</code> - what it says.</li>
+
+<li><p><code>board</code> - is the reference to the <code>Board</code> the droid is on along with other droids. We need this because the droid will make decisions by knowing its environment, which is the board&lt;./li&gt; </ul>
+There is also an empty <code>update()</code> method which is called each time the droid finishes its turn. If it&rsquo;s a realtime game, the update method is called from the game loop, ideally from the game engine.</p>
+
+<p>There are also the obvious getters and setters and the <code>toString()</code> method which are omitted from the listing.</p>
+
+<p>The <code>Board</code> class is vey simple.</p></li>
+</ul></li>
+</ul>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Board</span> <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">final</span> <span style="color: #902000">int</span> width<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">final</span> <span style="color: #902000">int</span> height<span style="color: #666666">;</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> List<span style="color: #666666">&lt;</span>Droid<span style="color: #666666">&gt;</span> droids <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> ArrayList<span style="color: #666666">&lt;</span>Droid<span style="color: #666666">&gt;();</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">Board</span><span style="color: #666666">(</span><span style="color: #902000">int</span> width<span style="color: #666666">,</span> <span style="color: #902000">int</span> height<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">width</span> <span style="color: #666666">=</span> width<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">height</span> <span style="color: #666666">=</span> height<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">int</span> <span style="color: #06287e">getWidth</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> width<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">int</span> <span style="color: #06287e">getHeight</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> height<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">addDroid</span><span style="color: #666666">(</span>Droid droid<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>isTileWalkable<span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">(),</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()))</span> <span style="color: #666666">{</span>
+            droids<span style="color: #666666">.</span><span style="color: #4070a0">add</span><span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+            droid<span style="color: #666666">.</span><span style="color: #4070a0">setBoard</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">);</span>
+        <span style="color: #666666">}</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">isTileWalkable</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span>Droid droid <span style="color: #666666">:</span> droids<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+            <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">==</span> x <span style="color: #666666">&amp;&amp;</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">==</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+                <span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">false</span><span style="color: #666666">;</span>
+            <span style="color: #666666">}</span>
+        <span style="color: #666666">}</span>
+        <span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">true</span><span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> List<span style="color: #666666">&lt;</span>Droid<span style="color: #666666">&gt;</span> <span style="color: #06287e">getDroids</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> droids<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>It has a <code>width</code> and a <code>height</code> and it contains a list of droids. It also contains a few convenience methods to check if a droid is already present at a given coordinate and a method to easily add droids one by one.</p>
+
+<p>So far this is pretty standard. We can scatter a few droids on the board but they will not do anything. We can create the board, add some droids to it and start calling <code>update()</code>. They are only some dumb droids.</p>
+
+<h2 id="not-so-dumb-droids">Not so Dumb Droids</h2>
+
+<p>To make a droid do something, we could implement the logic in its <code>update()</code> method. This is the method called every tick or in our case every turn. For example we want our droids to wander around the arena (board) and if they see an other droid in range, engage them and start firing at them until they die. This would be a very rudimentary AI but is still a AI.</p>
+
+<p>The pseudo code would look like this:</p>
+
+<pre><code>if enemy in range then fire missile at it
+otherwise pick a random adjacent tile and move there
+</code></pre>
+
+<p>This means any interaction between the droids will result in a stand-off and the weaker droid gets destroyed. We might want to avoid this. So we can add that if a droid is likely to lose, then try to flee. Stand and fight only if there is nowhere to escape.</p>
+
+<pre><code>if enemy in range then
+    if enemy is weaker then fight
+    otherwise
+        if escape route exists then escape
+        otherwise fight
+    otherwise wander
+</code></pre>
+
+<p>This is all good. The droids will start acting &#8220;intelligently&#8221; but they are still very limited unless we add more code to do more clever things. And also, they will act the same.</p>
+
+<p>Imagine if you drop them in a more complicated arena. An arena where there are items like power-ups to pick up to enhance powers, obstacles to avoid.</p>
+
+<p>For example decide between picking up a health/repair kit and picking up a weapon power-up when droids are swarming around.</p>
+
+<p>It can get out of hands quite quickly. Also what if we want a differently behaving droid. One is an assault droid and the other one is a repair droid. We could achieve this of course with <a href="http://obviam.net/index.php/design-in-game-entities-object-composition-strategies-part-1/" title="composition">object composition</a>, but the brains of the droids will be extremely complicated and any change in game design will require tremendous effort to accommodate.</p>
+
+<p>Let&rsquo;s see if we can come up with a system that can solve these problems.</p>
+
+<h2 id="here-comes-the-brain">Here Comes the Brain</h2>
+
+<p>We can think of the AI module of the droid as some kind of a brain. The brain is composed of several routines that act on the droid following a set of rules. These rules govern the execution of the routines so it maximises the chances of survival and winning the game as an ultimate goal.</p>
+
+<p>If we think of our human brain consisting of routines and having <a href="http://en.wikipedia.org/wiki/Maslow" onclick="javascript:\_gaq.push(['\_trackEvent','outbound-article','en.wikipedia.org']);"s\_hierarchy\_of_needs" title="Maslow's hierarchy of needs">Maslow&rsquo;s hierarchy of needs</a> as a reference , we can identify a few routines instantly.</p>
+
+<ul>
+<li><strong>Physiological routine</strong> - a routine that needs to be executed every time otherwise there won&rsquo;t be any living</li>
+<li><strong>Subsistence routine</strong> - this routine needs to be executed once the living conditions have been met so the long term existence is secured</li>
+<li><strong>Aspirational routine</strong> - this will be executed if there is time left after the subsistence has been secured and before subsistence needs to be executed again</li>
+</ul>
+
+<p>Let&rsquo;s break the human intelligence down a bit.</p>
+
+<p>A human needs to breathe to live. Each breath consumes energy. One can breathe so much until it runs out of energy. To replenish the energy one needs to eat. One can only eat if he/she has food at his/her disposal. If there is no available food, it needs to be acquired which consumes some more energy. If the procurement of food takes a long time (needs to be hunted for example) and the amount of food obtained is small, after eating it, the human is in need of more food and the routine restarts without delay. If the food was bought in bulks from a supermarket, after eating it, there is plenty left so the human can move on to do more interesting things which are in his/her aspirational section. Things like making friends or wage war or watch television for example.</p>
+
+<p>Just think of how many things are in a human brain to make us function and try to simulate it. This all by disregarding most of the stimuli we are getting and responding to them.</p>
+
+<p>To do this, we would need to parametrise the human body and each sensor triggered by a stimulus will update the correct parameters and the executed routine will examine the new values and act accordingly. I won&rsquo;t describe it now but you get the idea I hope.</p>
+
+<p>Let&rsquo;s switch back to our much simpler droids.</p>
+
+<p>If we try to adapt the human routines to the droids we&rsquo;ll get something like this:</p>
+
+<ul>
+<li><strong>Physiological / Existential</strong> - this part we can ignore for this example because we design robots and they are mechanical beings. Of course for them to exist, they still need energy (eg. action points) which they can take from a battery or from some other energy source which can be depleted. For the sake of simplicity we will ignore this and consider the energy source to be infinite.</li>
+<li><strong>Subsistence / Safety</strong> - this routine will make sure that the droid will survive the current turn and live by avoiding an immediate threat.</li>
+<li><strong>Aspirational</strong> - this kicks in once the safety routine checked out OK and didn&rsquo;t have to activate the droid&rsquo;s fleeing routine. The current simple aspiration for the droid is to kill the other droids. </ul></li>
+</ul>
+
+<p>Although the described routines are very simple and can be hard-coded, the approach we will take to implement is a bit more elaborate. We will use an approach based on <a href="http://en.wikipedia.org/wiki/Behavior_Trees" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','en.wikipedia.org']);" title="http://en.wikipedia.org/wiki/Behavior_Trees">behaviour trees</a>.</p>
+
+<p>First and foremost we need to delegate every activity of the droid to its brain. I will call it <code>Routine</code> instead of brain. It can be called <strong>Brain</strong> or <strong>AI</strong> or anything, but I have chosen <strong>Routine</strong> because it will serve as a base class for all the routines that will consist of. Also it will be in charge of governing the flow of information in the brain. The <code>Routine</code> itself is a finite state machine with 3 states.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">abstract</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Routine</span> <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">enum</span> RoutineState <span style="color: #666666">{</span>
+        Success<span style="color: #666666">,</span>
+        Failure<span style="color: #666666">,</span>
+        Running
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">protected</span> RoutineState state<span style="color: #666666">;</span>
+
+    <span style="color: #007020; font-weight: bold">protected</span> <span style="color: #06287e">Routine</span><span style="color: #666666">()</span> <span style="color: #666666">{</span> <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">start</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">state</span> <span style="color: #666666">=</span> RoutineState<span style="color: #666666">.</span><span style="color: #4070a0">Running</span><span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">abstract</span> <span style="color: #902000">void</span> <span style="color: #06287e">reset</span><span style="color: #666666">();</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">abstract</span> <span style="color: #902000">void</span> <span style="color: #06287e">act</span><span style="color: #666666">(</span>Droid droid<span style="color: #666666">,</span> Board board<span style="color: #666666">);</span>
+
+    <span style="color: #007020; font-weight: bold">protected</span> <span style="color: #902000">void</span> <span style="color: #06287e">succeed</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">state</span> <span style="color: #666666">=</span> RoutineState<span style="color: #666666">.</span><span style="color: #4070a0">Success</span><span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">protected</span> <span style="color: #902000">void</span> <span style="color: #06287e">fail</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">state</span> <span style="color: #666666">=</span> RoutineState<span style="color: #666666">.</span><span style="color: #4070a0">Failure</span><span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">isSuccess</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> state<span style="color: #666666">.</span><span style="color: #4070a0">equals</span><span style="color: #666666">(</span>RoutineState<span style="color: #666666">.</span><span style="color: #4070a0">Success</span><span style="color: #666666">);</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">isFailure</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> state<span style="color: #666666">.</span><span style="color: #4070a0">equals</span><span style="color: #666666">(</span>RoutineState<span style="color: #666666">.</span><span style="color: #4070a0">Failure</span><span style="color: #666666">);</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">isRunning</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> state<span style="color: #666666">.</span><span style="color: #4070a0">equals</span><span style="color: #666666">(</span>RoutineState<span style="color: #666666">.</span><span style="color: #4070a0">Running</span><span style="color: #666666">);</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> RoutineState <span style="color: #06287e">getState</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> state<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>The 3 states are:</p>
+
+<ul>
+<li><code>Running</code> - the routine is currently running and will act on the droid in the next turn. Eg. the routine is responsible to move the droid to a certain position and the droid is in transit and still moving uninterrupted.</li>
+<li><code>Success</code> - the routine has finished and it succeeded doing what it was meant to be doing. For example if the routine is still the &#8220;move to position&#8221;, it succeeded when the droid reached the destination.</li>
+<li><code>Failure</code> - using the previous example (move to), the moving of the droid was interrupted (either the droid got destroyed or some unexpected obstacle appeared or some other routine interfered) and it didn&rsquo;t reach the destination.</li>
+</ul>
+
+<p>The <code>Routine</code> class has the <code>act(Droid droid, Board board)</code> abstract method. We need to pass in the <code>Droid</code> and the <code>Board</code> because when the routine acts, it does so on the droid and in the knowledge of the droid&rsquo;s environment which is the board.</p>
+
+<p>For example the <code>moveTo</code> routine will change the droid&rsquo;s position each turn. Usually when the routine acts on the droid, it uses the knowledge gathered from its environment. This knowledge is modelled on the realities of the situation. Imagine that the droid (like us humans) can&rsquo;t see the whole world but only as far as its sight range. Us humans have a field of view of about 135 degrees so if we would be simulating a human, we&rsquo;d pass in a slice of the world containing the section we see and all the visible components in it and let the routine process just that to the best of its capabilities and come to a conclusion. We could do that for the droids too, and just pass in the section of the board that is covered by the <code>range</code>, but we will keep it simple for now and use the whole board.</p>
+
+<p>The <code>start()</code>, <code>succeed()</code> and <code>fail()</code> methods are simple public overridable methods that set the state accordingly.</p>
+
+<p>The <code>reset()</code> method on the other hand is abstract and it has to be implemented by each concrete routine to reset any internal state proprietary to that routine.</p>
+
+<p>The rest are convenience methods to query the state of the routine.</p>
+
+<h2 id="learning-to-walk">Learning to Walk</h2>
+
+<p>Let&rsquo;s implement the first concrete routine which will be the <code>MoveTo</code> discussed above.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">MoveTo</span> <span style="color: #007020; font-weight: bold">extends</span> Routine <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">final</span> <span style="color: #007020; font-weight: bold">protected</span> <span style="color: #902000">int</span> destX<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">final</span> <span style="color: #007020; font-weight: bold">protected</span> <span style="color: #902000">int</span> destY<span style="color: #666666">;</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">MoveTo</span><span style="color: #666666">(</span><span style="color: #902000">int</span> destX<span style="color: #666666">,</span> <span style="color: #902000">int</span> destY<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">super</span><span style="color: #666666">();</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">destX</span> <span style="color: #666666">=</span> destX<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">destY</span> <span style="color: #666666">=</span> destY<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">reset</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        start<span style="color: #666666">();</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #555555; font-weight: bold">@Override</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">act</span><span style="color: #666666">(</span>Droid droid<span style="color: #666666">,</span> Board board<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>isRunning<span style="color: #666666">())</span> <span style="color: #666666">{</span>
+            <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(!</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">isAlive</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+                fail<span style="color: #666666">();</span>
+                <span style="color: #007020; font-weight: bold">return</span><span style="color: #666666">;</span>
+            <span style="color: #666666">}</span>
+            <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(!</span>isDroidAtDestination<span style="color: #666666">(</span>droid<span style="color: #666666">))</span> <span style="color: #666666">{</span>
+                moveDroid<span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+            <span style="color: #666666">}</span>
+        <span style="color: #666666">}</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">void</span> <span style="color: #06287e">moveDroid</span><span style="color: #666666">(</span>Droid droid<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>destY <span style="color: #666666">!=</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+            <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>destY <span style="color: #666666">&gt;</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+                droid<span style="color: #666666">.</span><span style="color: #4070a0">setY</span><span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> <span style="color: #40a070">1</span><span style="color: #666666">);</span>
+            <span style="color: #666666">}</span> <span style="color: #007020; font-weight: bold">else</span> <span style="color: #666666">{</span>
+                droid<span style="color: #666666">.</span><span style="color: #4070a0">setY</span><span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">-</span> <span style="color: #40a070">1</span><span style="color: #666666">);</span>
+            <span style="color: #666666">}</span>
+        <span style="color: #666666">}</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>destX <span style="color: #666666">!=</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+            <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>destX <span style="color: #666666">&gt;</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+                droid<span style="color: #666666">.</span><span style="color: #4070a0">setX</span><span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> <span style="color: #40a070">1</span><span style="color: #666666">);</span>
+            <span style="color: #666666">}</span> <span style="color: #007020; font-weight: bold">else</span> <span style="color: #666666">{</span>
+                droid<span style="color: #666666">.</span><span style="color: #4070a0">setX</span><span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">-</span> <span style="color: #40a070">1</span><span style="color: #666666">);</span>
+            <span style="color: #666666">}</span>
+        <span style="color: #666666">}</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>isDroidAtDestination<span style="color: #666666">(</span>droid<span style="color: #666666">))</span> <span style="color: #666666">{</span>
+            succeed<span style="color: #666666">();</span>
+        <span style="color: #666666">}</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">isDroidAtDestination</span><span style="color: #666666">(</span>Droid droid<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> destX <span style="color: #666666">==</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">&amp;&amp;</span> destY <span style="color: #666666">==</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">();</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>It&rsquo;s a very basic class that will move the droid one tile towards the destination until it reaches it. It does not check for any other constraint than if the droid is alive. That&rsquo;s the condition for failure.</p>
+
+<p>The routine has 2 parameters <code>destX</code> and <code>destY</code>. These are final attributes which the <code>MoveTo</code> routine will use to achieve its target. The routine&rsquo;s <strong>single responsibility</strong> is to move the droid. If it can&rsquo;t do that it will fail. That&rsquo;s it. <strong>Single responsibility</strong> is very important here. We will see how we&rsquo;ll combine these to achieve more complex behaviours.</p>
+
+<p>The <code>reset()</code> method simply sets the status to <code>Running</code>. It has no other internal state or values to deal with, but it needs to be overridden.</p>
+
+<p>The heart of the routine is the <code>act(Droid droid, Board board)</code> method which performs the action and contains the logic. First it checks for the failure condition, which is if the droid is dead. If it&rsquo;s dead and the routine is active (its status is <code>Running</code>) then the routine failed to do what it was supposed to. It calls the super class&rsquo;s default <code>fail()</code> method to set the status to <code>Failure</code> and exits the method.</p>
+
+<p>The second part of the method checks for the success condition. If the droid is not yet at the destination, then move the droid one tile towards the destination. If its&rsquo; reached the destination, set the state to <code>Success</code>.</p>
+
+<p>The check for <code>isRunning()</code> is made to make sure that the routine only acts if the routine is active and hasn&rsquo;t finished.</p>
+
+<p>We also need to fill in the <code>Droid</code>&#8216;s <code>update</code> method to make it use the routine. It&rsquo;s just a simple delegation. This is how it looks like:</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">update</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>routine<span style="color: #666666">.</span><span style="color: #4070a0">getState</span><span style="color: #666666">()</span> <span style="color: #666666">==</span> <span style="color: #007020; font-weight: bold">null</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+            <span style="color: #60a0b0; font-style: italic">// hasn&#39;t started yet so we start it</span>
+            routine<span style="color: #666666">.</span><span style="color: #4070a0">start</span><span style="color: #666666">();</span>
+        <span style="color: #666666">}</span>
+        routine<span style="color: #666666">.</span><span style="color: #4070a0">act</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">,</span> board<span style="color: #666666">);</span>
+    <span style="color: #666666">}</span>
+</pre></div>
+
+<p>It should consist only of line <strong>#6</strong> but I also put in a check to see if the state is <code>null</code> and if so, then <code>start</code> the routine. This is a hack to start the routine the first time <code>update</code> is called.</p>
+
+<p>It&rsquo;s a quasi command pattern, as in the <code>act</code> method gets the receiver of the action command as a parameter, which is the droid itself.</p>
+
+<p>I also modified the <code>Routine</code> class to log the different events in it, so we can see what&rsquo;s happening.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #60a0b0; font-style: italic">// --- omitted --- */</span>
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">start</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+    System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;&gt;&gt;&gt; Starting routine: &quot;</span> <span style="color: #666666">+</span> <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">getClass</span><span style="color: #666666">().</span><span style="color: #4070a0">getSimpleName</span><span style="color: #666666">());</span>
+    <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">state</span> <span style="color: #666666">=</span> RoutineState<span style="color: #666666">.</span><span style="color: #4070a0">Running</span><span style="color: #666666">;</span>
+<span style="color: #666666">}</span>
+
+<span style="color: #007020; font-weight: bold">protected</span> <span style="color: #902000">void</span> <span style="color: #06287e">succeed</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+    System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;&gt;&gt;&gt; Routine: &quot;</span> <span style="color: #666666">+</span> <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">getClass</span><span style="color: #666666">().</span><span style="color: #4070a0">getSimpleName</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; SUCCEEDED&quot;</span><span style="color: #666666">);</span>
+    <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">state</span> <span style="color: #666666">=</span> RoutineState<span style="color: #666666">.</span><span style="color: #4070a0">Success</span><span style="color: #666666">;</span>
+<span style="color: #666666">}</span>
+
+<span style="color: #007020; font-weight: bold">protected</span> <span style="color: #902000">void</span> <span style="color: #06287e">fail</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+    System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;&gt;&gt;&gt; Routine: &quot;</span> <span style="color: #666666">+</span> <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">getClass</span><span style="color: #666666">().</span><span style="color: #4070a0">getSimpleName</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; FAILED&quot;</span><span style="color: #666666">);</span>
+    <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">state</span> <span style="color: #666666">=</span> RoutineState<span style="color: #666666">.</span><span style="color: #4070a0">Failure</span><span style="color: #666666">;</span>
+<span style="color: #666666">}</span>
+<span style="color: #60a0b0; font-style: italic">// --- omitted --- */</span>
+</pre></div>
+
+<p>Let&rsquo;s put it to test with a simple <code>Test</code> class.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Test</span> <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> <span style="color: #902000">void</span> <span style="color: #06287e">main</span><span style="color: #666666">(</span>String<span style="color: #666666">[]</span> args<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #60a0b0; font-style: italic">// Setup</span>
+        Board board <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Board<span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">,</span> <span style="color: #40a070">10</span><span style="color: #666666">);</span>
+
+        Droid droid <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Droid<span style="color: #666666">(</span><span style="color: #4070a0">&quot;MyDroid&quot;</span><span style="color: #666666">,</span> <span style="color: #40a070">5</span><span style="color: #666666">,</span> <span style="color: #40a070">5</span><span style="color: #666666">,</span> <span style="color: #40a070">10</span><span style="color: #666666">,</span> <span style="color: #40a070">1</span><span style="color: #666666">,</span> <span style="color: #40a070">2</span><span style="color: #666666">);</span>
+        board<span style="color: #666666">.</span><span style="color: #4070a0">addDroid</span><span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+
+        Routine moveTo <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> MoveTo<span style="color: #666666">(</span><span style="color: #40a070">7</span><span style="color: #666666">,</span> <span style="color: #40a070">9</span><span style="color: #666666">);</span>
+        droid<span style="color: #666666">.</span><span style="color: #4070a0">setRoutine</span><span style="color: #666666">(</span>moveTo<span style="color: #666666">);</span>
+        System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+
+        <span style="color: #60a0b0; font-style: italic">// Execute 5 turns and print the droid out</span>
+        <span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span><span style="color: #902000">int</span> i <span style="color: #666666">=</span> <span style="color: #40a070">0</span><span style="color: #666666">;</span> i <span style="color: #666666">&lt;</span> <span style="color: #40a070">5</span><span style="color: #666666">;</span> i<span style="color: #666666">++)</span> <span style="color: #666666">{</span>
+            droid<span style="color: #666666">.</span><span style="color: #4070a0">update</span><span style="color: #666666">();</span>
+            System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+        <span style="color: #666666">}</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>It&rsquo;s a standard class with a <code>main</code> method which firsts sets up a square <strong>10 x 10</strong> <code>Board</code> and adds a <code>Droid</code> with the provided attributes at the coordinates <strong>5,5</strong>.</p>
+
+<p>On line <strong>#10</strong> we create the <code>MoveTo</code> routine which sets the destination to <strong>(7,9)</strong>. We set this routine to be the only routine of the droid (line <strong>#11</strong>) and print the droid&rsquo;s state (line <strong>#12</strong>).</p>
+
+<p>Then we execute 5 turns and display the droid&rsquo;s state after each turn.</p>
+
+<p>Running the <code>Test</code> we see the following printed to the sysout:</p>
+
+<pre><code>
+Droid{name=MyDroid, x=5, y=5, health=10, range=2, damage=1}
+Starting routine: MoveTo
+Droid{name=MyDroid, x=6, y=6, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=7, y=7, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=7, y=8, health=10, range=2, damage=1}
+&gt;&gt;&gt; Routine: MoveTo SUCCEEDED
+Droid{name=MyDroid, x=7, y=9, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=7, y=9, health=10, range=2, damage=1}
+</code></pre>
+
+<p>As we can see the droid starts at position (5,5) as expected. Calling the <code>update</code> method for the first time, starts the <code>MoveTo</code> routine. The subsequent 3 calls to the update will move the droid to the destination by changing its coordinate each turn by one. After the routine succeeded, all the calls passed to the routine are ignored, because it&rsquo;s complete.</p>
+
+<p>This is the first step, but it&rsquo;s not very helpful. Let&rsquo;s say we want to have our droid wander around the board. To achieve this, we will need to execute the <code>MoveTo</code> routine repeatedly, but every time it restarts, the destination needs to be randomly picked.</p>
+
+<h2 id="wandering-about">Wandering About</h2>
+
+<p>But let&rsquo;s start with the <code>Wander</code> routine. It&rsquo;s nothing more than a <code>MoveTo</code> but we generate a random destination given that we know the board.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Wander</span> <span style="color: #007020; font-weight: bold">extends</span> Routine <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #007020; font-weight: bold">static</span> Random random <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Random<span style="color: #666666">();</span>
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #007020; font-weight: bold">final</span> Board board<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> MoveTo moveTo<span style="color: #666666">;</span>
+
+    <span style="color: #555555; font-weight: bold">@Override</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">start</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">super</span><span style="color: #666666">.</span><span style="color: #4070a0">start</span><span style="color: #666666">();</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span><span style="color: #666666">.</span><span style="color: #4070a0">start</span><span style="color: #666666">();</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">reset</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span> <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> MoveTo<span style="color: #666666">(</span>random<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span>board<span style="color: #666666">.</span><span style="color: #4070a0">getWidth</span><span style="color: #666666">()),</span> random<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span>board<span style="color: #666666">.</span><span style="color: #4070a0">getHeight</span><span style="color: #666666">()));</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">Wander</span><span style="color: #666666">(</span>Board board<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">super</span><span style="color: #666666">();</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">board</span> <span style="color: #666666">=</span> board<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span> <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> MoveTo<span style="color: #666666">(</span>random<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span>board<span style="color: #666666">.</span><span style="color: #4070a0">getWidth</span><span style="color: #666666">()),</span> random<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span>board<span style="color: #666666">.</span><span style="color: #4070a0">getHeight</span><span style="color: #666666">()));</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #555555; font-weight: bold">@Override</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">act</span><span style="color: #666666">(</span>Droid droid<span style="color: #666666">,</span> Board board<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(!</span>moveTo<span style="color: #666666">.</span><span style="color: #4070a0">isRunning</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+            <span style="color: #007020; font-weight: bold">return</span><span style="color: #666666">;</span>
+        <span style="color: #666666">}</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span><span style="color: #666666">.</span><span style="color: #4070a0">act</span><span style="color: #666666">(</span>droid<span style="color: #666666">,</span> board<span style="color: #666666">);</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span><span style="color: #666666">.</span><span style="color: #4070a0">isSuccess</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+            succeed<span style="color: #666666">();</span>
+        <span style="color: #666666">}</span> <span style="color: #007020; font-weight: bold">else</span> <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span><span style="color: #666666">.</span><span style="color: #4070a0">isFailure</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+            fail<span style="color: #666666">();</span>
+        <span style="color: #666666">}</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>Following the single responsibility principle, the <code>Wander</code> class&rsquo;s sole purpose is to pick the random destination on the board. Then it uses the <code>MoveTo</code> routine to get the droid to the new destination.</p>
+
+<p>The <code>reset</code> method will restart it and pick a new random destination.</p>
+
+<p>The destination is set in the constructor. If we&rsquo;d like our droid to wander, we would change the <code>Test</code> class to the following:</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Test</span> <span style="color: #666666">{</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> <span style="color: #902000">void</span> <span style="color: #06287e">main</span><span style="color: #666666">(</span>String<span style="color: #666666">[]</span> args<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #60a0b0; font-style: italic">// Setup</span>
+        Board board <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Board<span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">,</span> <span style="color: #40a070">10</span><span style="color: #666666">);</span>
+
+        Droid droid <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Droid<span style="color: #666666">(</span><span style="color: #4070a0">&quot;MyDroid&quot;</span><span style="color: #666666">,</span> <span style="color: #40a070">5</span><span style="color: #666666">,</span> <span style="color: #40a070">5</span><span style="color: #666666">,</span> <span style="color: #40a070">10</span><span style="color: #666666">,</span> <span style="color: #40a070">1</span><span style="color: #666666">,</span> <span style="color: #40a070">2</span><span style="color: #666666">);</span>
+        board<span style="color: #666666">.</span><span style="color: #4070a0">addDroid</span><span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+
+        Routine routine <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Wander<span style="color: #666666">(</span>board<span style="color: #666666">);</span>
+        droid<span style="color: #666666">.</span><span style="color: #4070a0">setRoutine</span><span style="color: #666666">(</span>routine<span style="color: #666666">);</span>
+        System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+
+        <span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span><span style="color: #902000">int</span> i <span style="color: #666666">=</span> <span style="color: #40a070">0</span><span style="color: #666666">;</span> i <span style="color: #666666">&lt;</span> <span style="color: #40a070">5</span><span style="color: #666666">;</span> i<span style="color: #666666">++)</span> <span style="color: #666666">{</span>
+            droid<span style="color: #666666">.</span><span style="color: #4070a0">update</span><span style="color: #666666">();</span>
+            System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+        <span style="color: #666666">}</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>The output would be something similar to this:</p>
+
+<pre><code>Droid{name=MyDroid, x=5, y=5, health=10, range=2, damage=1}
+&gt;&gt;&gt; Starting routine: Wander
+&gt;&gt;&gt; Starting routine: MoveTo
+Droid{name=MyDroid, x=6, y=6, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=7, y=7, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=7, y=8, health=10, range=2, damage=1}
+&gt;&gt;&gt; Routine: MoveTo SUCCEEDED
+&gt;&gt;&gt; Routine: Wander SUCCEEDED
+Droid{name=MyDroid, x=7, y=9, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=7, y=9, health=10, range=2, damage=1}
+</code></pre>
+
+<p>Notice how the <code>Wander</code> contains and delegates to the <code>MoveTo</code> routine.</p>
+
+<h2 id="repeat-repeat-repeat-8230">Repeat, Repeat, Repeat &#8230;</h2>
+
+<p>This is all good but what if we want the droid to be wandering repeatedly?</p>
+
+<p>We will make a <code>Repeat</code> routine which will contain a routine to be repeated. Also we will make this routine so that it can take in a parameter to specify how many times we want to repeat a routine. If it won&rsquo;t take in a parameter, then it will repeat the containing routine forever or until the droid&rsquo;s dead.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Repeat</span> <span style="color: #007020; font-weight: bold">extends</span> Routine <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #007020; font-weight: bold">final</span> Routine routine<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">int</span> times<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">int</span> originalTimes<span style="color: #666666">;</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">Repeat</span><span style="color: #666666">(</span>Routine routine<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">super</span><span style="color: #666666">();</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">routine</span> <span style="color: #666666">=</span> routine<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">times</span> <span style="color: #666666">=</span> <span style="color: #666666">-</span><span style="color: #40a070">1</span><span style="color: #666666">;</span> <span style="color: #60a0b0; font-style: italic">// infinite</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">originalTimes</span> <span style="color: #666666">=</span> times<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">Repeat</span><span style="color: #666666">(</span>Routine routine<span style="color: #666666">,</span> <span style="color: #902000">int</span> times<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">super</span><span style="color: #666666">();</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>times <span style="color: #666666">&lt;</span> <span style="color: #40a070">1</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+            <span style="color: #007020; font-weight: bold">throw</span> <span style="color: #007020; font-weight: bold">new</span> RuntimeException<span style="color: #666666">(</span><span style="color: #4070a0">&quot;Can&#39;t repeat negative times.&quot;</span><span style="color: #666666">);</span>
+        <span style="color: #666666">}</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">routine</span> <span style="color: #666666">=</span> routine<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">times</span> <span style="color: #666666">=</span> times<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">originalTimes</span> <span style="color: #666666">=</span> times<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #555555; font-weight: bold">@Override</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">start</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">super</span><span style="color: #666666">.</span><span style="color: #4070a0">start</span><span style="color: #666666">();</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">routine</span><span style="color: #666666">.</span><span style="color: #4070a0">start</span><span style="color: #666666">();</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">reset</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #60a0b0; font-style: italic">// reset counters</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">times</span> <span style="color: #666666">=</span> originalTimes<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #555555; font-weight: bold">@Override</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">act</span><span style="color: #666666">(</span>Droid droid<span style="color: #666666">,</span> Board board<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>routine<span style="color: #666666">.</span><span style="color: #4070a0">isFailure</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+            fail<span style="color: #666666">();</span>
+        <span style="color: #666666">}</span> <span style="color: #007020; font-weight: bold">else</span> <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>routine<span style="color: #666666">.</span><span style="color: #4070a0">isSuccess</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+            <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>times <span style="color: #666666">==</span> <span style="color: #40a070">0</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+                succeed<span style="color: #666666">();</span>
+                <span style="color: #007020; font-weight: bold">return</span><span style="color: #666666">;</span>
+            <span style="color: #666666">}</span>
+            <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>times <span style="color: #666666">&gt;</span> <span style="color: #40a070">0</span> <span style="color: #666666">||</span> times <span style="color: #666666">&lt;=</span> <span style="color: #666666">-</span><span style="color: #40a070">1</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+                times<span style="color: #666666">--;</span>
+                routine<span style="color: #666666">.</span><span style="color: #4070a0">reset</span><span style="color: #666666">();</span>
+                routine<span style="color: #666666">.</span><span style="color: #4070a0">start</span><span style="color: #666666">();</span>
+            <span style="color: #666666">}</span>
+        <span style="color: #666666">}</span>
+        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>routine<span style="color: #666666">.</span><span style="color: #4070a0">isRunning</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+            routine<span style="color: #666666">.</span><span style="color: #4070a0">act</span><span style="color: #666666">(</span>droid<span style="color: #666666">,</span> board<span style="color: #666666">);</span>
+        <span style="color: #666666">}</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>The code is easy to follow but I&rsquo;ll explain a few things that were added.</p>
+
+<p>The attribute <code>routine</code> is passed in the constructor and that will be the routine that gets repeated. The <code>originalTimes</code> is a storage variable that holds the initial number of times value, so we can restart the routine with the <code>reset()</code> call. This is just a back-up of the initial state.</p>
+
+<p>The <code>times</code> attribute is how many times the provided routine will be repeated. If it&rsquo;s <code>-1</code> then it&rsquo;s infinite. This is all coded in the logic inside the <code>act</code> method.</p>
+
+<p>To test this out, we need to create a <code>Repeat</code> routine and provide what to repeat.</p>
+
+<p>For example, to have the droid wander endlessly, we&rsquo;d have this:</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span>Routine routine <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Repeat<span style="color: #666666">((</span><span style="color: #007020; font-weight: bold">new</span> Wander<span style="color: #666666">(</span>board<span style="color: #666666">)));</span>
+droid<span style="color: #666666">.</span><span style="color: #4070a0">setRoutine</span><span style="color: #666666">(</span>routine<span style="color: #666666">);</span>
+</pre></div>
+
+<p>If we&rsquo;d call the <code>update</code> repeatedly, we&rsquo;ll see that the droid will be moving constantly.</p>
+
+<p>Check this sample output:</p>
+
+<pre><code>Droid{name=MyDroid, x=5, y=5, health=10, range=2, damage=1}
+&gt;&gt;&gt; Starting routine: Repeat
+&gt;&gt;&gt; Starting routine: Wander
+&gt;&gt;&gt; Starting routine: MoveTo
+Droid{name=MyDroid, x=4, y=6, health=10, range=2, damage=1}
+&gt;&gt;&gt; Routine: MoveTo SUCCEEDED
+&gt;&gt;&gt; Routine: Wander SUCCEEDED
+Droid{name=MyDroid, x=4, y=7, health=10, range=2, damage=1}
+&gt;&gt;&gt; Starting routine: Wander
+&gt;&gt;&gt; Starting routine: MoveTo
+Droid{name=MyDroid, x=5, y=6, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=6, y=5, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=7, y=4, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=8, y=3, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=8, y=2, health=10, range=2, damage=1}
+&gt;&gt;&gt; Routine: MoveTo SUCCEEDED
+&gt;&gt;&gt; Routine: Wander SUCCEEDED
+Droid{name=MyDroid, x=8, y=1, health=10, range=2, damage=1}
+&gt;&gt;&gt; Starting routine: Wander
+&gt;&gt;&gt; Starting routine: MoveTo
+Droid{name=MyDroid, x=7, y=2, health=10, range=2, damage=1}
+Droid{name=MyDroid, x=6, y=3, health=10, range=2, damage=1}
+</code></pre>
+
+<p>Notice how the <code>Repeat</code> routine does not end.</p>
+
+<h2 id="assembling-the-intelligence">Assembling the Intelligence</h2>
+
+<p>So far we&rsquo;re just composing behaviours. But what if we want to add decision making to the droids and build a more complex behaviour? Enter the behaviour trees. This term doesn&rsquo;t describe what it is and neither do most of the articles that I found. I&rsquo;ll start with what I want to achieve first and hopefully it will all make sense.</p>
+
+<p>I want to implement the behaviour described at the beginning of the article.</p>
+
+<p>I want my droid to scan if there is a weaker droid in its range and engage it if it is, or flee otherwise.</p>
+
+<p>Take a look at the following diagram. It shows a tree. It&rsquo;s nothing more than a routine composed of multiple different routines. Each node is a routine and we will have to implement some special routines.</p>
+
+<p><a href="/images/archive/2014/08/droids_ai_bt.png"><img src="/images/archive/2014/08/droids_ai_bt.png" alt="Droid AI (Behaviour Tree)" width="470" height="460" /></a></p>
+
+<p>Droid AI (Behaviour Tree)</p>
+
+<p>Let&rsquo;s break the routines down.</p>
+
+<ul>
+<li><code>Repeat</code> - is the routine implemented earlier. It will repeat the given routine forever or until the embedded routine fails.</li>
+<li><code>Sequence</code> - the sequence routine will succeed only when all the routines that it contains have succeeded. For example to attack a droid, the enemy droid needs to be in range, the gun needs to be loaded and the droid needs to pull the trigger. Everything in this order. So the sequence contains a list of routines and acts on them until all succeed. If the gun is not loaded then there is no point in pulling the trigger so the whole attack is a failure.
+
+<ul>
+<li><code>Selector</code> - this routine contains a list of one or more routines. When it acts, it will succeed when one of the routines in the list succeeds. The order in which the routines are executed is set by the order in which the routines are passed in. If we&rsquo;d like to randomise the execution of routines, it&rsquo;s easy to create a <code>Random</code> routine whose sole purpose is to randomise the list of routines passed in.</li>
+<li>All the grey routines are leaves in the tree, meaning that they can&rsquo;t have any subsequent routines and these are the ones that act on the droid which is the receiver. </ul>
+The above tree represents the very basic AI we wanted to implement. Let&rsquo;s follow it through starting from the root.</li>
+</ul></li>
+</ul>
+
+<p><code>Repeat</code> - will repeat the selector indefinitely until neither of the branches can be executed successfully. The routines in the selector are: <code>Attack a droid</code> and <code>Wander</code>. If both fail that means that the droid is dead.</p>
+
+<p>The <code>Attack a droid</code> routine is a sequence of routines meaning that all of them have to succeed in order for the whole branch to succeed. If it fails, then the fall back is to pick a random destination through <code>Wander</code> and to move there.</p>
+
+<p>Then repeat.</p>
+
+<p>All we need to do is to implement the routines.</p>
+
+<p>For example the <code>IsDroidInRange</code> could look something like this:</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">IsDroidInRange</span> <span style="color: #007020; font-weight: bold">extends</span> Routine <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">IsDroidInRange</span><span style="color: #666666">()</span> <span style="color: #666666">{}</span>
+
+    <span style="color: #555555; font-weight: bold">@Override</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">reset</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        start<span style="color: #666666">();</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #555555; font-weight: bold">@Override</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">act</span><span style="color: #666666">(</span>Droid droid<span style="color: #666666">,</span> Board board<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #60a0b0; font-style: italic">// find droid in range</span>
+        <span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span>Droid enemy <span style="color: #666666">:</span> board<span style="color: #666666">.</span><span style="color: #4070a0">getDroids</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+            <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(!</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getName</span><span style="color: #666666">().</span><span style="color: #4070a0">equals</span><span style="color: #666666">(</span>enemy<span style="color: #666666">))</span> <span style="color: #666666">{</span>
+                <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>isInRange<span style="color: #666666">(</span>droid<span style="color: #666666">,</span> enemy<span style="color: #666666">))</span> <span style="color: #666666">{</span>
+                    succeed<span style="color: #666666">();</span>
+                    <span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+                <span style="color: #666666">}</span>
+            <span style="color: #666666">}</span>
+        <span style="color: #666666">}</span>
+        fail<span style="color: #666666">();</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">isInRange</span><span style="color: #666666">(</span>Droid droid<span style="color: #666666">,</span> Droid enemy<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> <span style="color: #666666">(</span>Math<span style="color: #666666">.</span><span style="color: #4070a0">abs</span><span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">-</span> enemy<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">())</span> <span style="color: #666666">&lt;=</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getRange</span><span style="color: #666666">()</span>
+                <span style="color: #666666">||</span> Math<span style="color: #666666">.</span><span style="color: #4070a0">abs</span><span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">-</span> enemy<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">())</span> <span style="color: #666666">&lt;</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getRange</span><span style="color: #666666">());</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>It&rsquo;s a very basic implementation. The way it determines if a droid is in range, is by iterating through all the droids on the board and if the enemy droid (assuming that the names are unique) is within range, then it succeeded. Otherwise it failed.</p>
+
+<p>Of course we need to feed in this droid to the next routine somehow, which is <code>IsEnemyStronger</code>. This can be achieved by giving the droid a context. One simple way could be that the <code>Droid</code> class could have an attribute <code>nearestEnemy</code> and on <code>success</code> the routine will populate that field and on failure it will clear it. This way the following routine can access the droid&rsquo;s internals and use that information to work out its success or failure scenarios.</p>
+
+<p>Of course this can be and should be extended so the droid will contain a list of droids in its range and have a routine to work out if the droid should fly or fight. But it&rsquo;s not the scope of this introduction.</p>
+
+<p>I won&rsquo;t be implementing all the routines in the article, but you will be able to check out the code on github: <a href="https://github.com/obviam/behavior-trees" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','github.com']);" title="https://github.com/obviam/behavior-trees"><a href="https://github.com/obviam/behavior-trees">https://github.com/obviam/behavior-trees</a></a> and I will be adding more and more routines.</p>
+
+<h2 id="where-to-go-from-here">Where to go from here?</h2>
+
+<p>There are quite a few improvements that can be made just by looking at it. As a first step to test the system out, I&rsquo;d move the creation of the routines to a factory for convenience.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic"> * Static convenience methods to create routines</span>
+<span style="color: #60a0b0; font-style: italic"> */</span>
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Routines</span> <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> Routine <span style="color: #06287e">sequence</span><span style="color: #666666">(</span>Routine<span style="color: #666666">...</span> routines<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        Sequence sequence <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Sequence<span style="color: #666666">();</span>
+        <span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span>Routine routine <span style="color: #666666">:</span> routines<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+            sequence<span style="color: #666666">.</span><span style="color: #4070a0">addRoutine</span><span style="color: #666666">(</span>routine<span style="color: #666666">);</span>
+        <span style="color: #666666">}</span>
+        <span style="color: #007020; font-weight: bold">return</span> sequence<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> Routine <span style="color: #06287e">selector</span><span style="color: #666666">(</span>Routine<span style="color: #666666">...</span> routines<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        Selector selector <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Selector<span style="color: #666666">();</span>
+        <span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span>Routine routine <span style="color: #666666">:</span> routines<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+            selector<span style="color: #666666">.</span><span style="color: #4070a0">addRoutine</span><span style="color: #666666">(</span>routine<span style="color: #666666">);</span>
+        <span style="color: #666666">}</span>
+        <span style="color: #007020; font-weight: bold">return</span> selector<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> Routine <span style="color: #06287e">moveTo</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">new</span> MoveTo<span style="color: #666666">(</span>x<span style="color: #666666">,</span> y<span style="color: #666666">);</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> Routine <span style="color: #06287e">repeatInfinite</span><span style="color: #666666">(</span>Routine routine<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">new</span> Repeat<span style="color: #666666">(</span>routine<span style="color: #666666">);</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> Routine <span style="color: #06287e">repeat</span><span style="color: #666666">(</span>Routine routine<span style="color: #666666">,</span> <span style="color: #902000">int</span> times<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">new</span> Repeat<span style="color: #666666">(</span>routine<span style="color: #666666">,</span> times<span style="color: #666666">);</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> Routine <span style="color: #06287e">wander</span><span style="color: #666666">(</span>Board board<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">new</span> Wander<span style="color: #666666">(</span>board<span style="color: #666666">);</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> Routine <span style="color: #06287e">IsDroidInRange</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">new</span> IsDroidInRange<span style="color: #666666">();</span>
+    <span style="color: #666666">}</span>
+
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>This will allow to test some scenarios out in a more elegant way. For example to place 2 droids with different behaviours you could do the following:</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> <span style="color: #902000">void</span> <span style="color: #06287e">main</span><span style="color: #666666">(</span>String<span style="color: #666666">[]</span> args<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        Board board <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Board<span style="color: #666666">(</span><span style="color: #40a070">25</span><span style="color: #666666">,</span> <span style="color: #40a070">25</span><span style="color: #666666">);</span>
+        Droid droid1 <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Droid<span style="color: #666666">(</span><span style="color: #4070a0">&quot;Droid_1&quot;</span><span style="color: #666666">,</span> <span style="color: #40a070">2</span><span style="color: #666666">,</span> <span style="color: #40a070">2</span><span style="color: #666666">,</span> <span style="color: #40a070">10</span><span style="color: #666666">,</span> <span style="color: #40a070">1</span><span style="color: #666666">,</span> <span style="color: #40a070">3</span><span style="color: #666666">);</span>
+        Droid droid2 <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Droid<span style="color: #666666">(</span><span style="color: #4070a0">&quot;Droid_2&quot;</span><span style="color: #666666">,</span> <span style="color: #40a070">10</span><span style="color: #666666">,</span> <span style="color: #40a070">10</span><span style="color: #666666">,</span> <span style="color: #40a070">10</span><span style="color: #666666">,</span> <span style="color: #40a070">2</span><span style="color: #666666">,</span> <span style="color: #40a070">2</span><span style="color: #666666">);</span>
+
+        Routine brain1 <span style="color: #666666">=</span> Routines<span style="color: #666666">.</span><span style="color: #4070a0">sequence</span><span style="color: #666666">(</span>
+                Routines<span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span><span style="color: #666666">(</span><span style="color: #40a070">5</span><span style="color: #666666">,</span> <span style="color: #40a070">10</span><span style="color: #666666">),</span>
+                Routines<span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span><span style="color: #666666">(</span><span style="color: #40a070">15</span><span style="color: #666666">,</span> <span style="color: #40a070">12</span><span style="color: #666666">),</span>
+                Routines<span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span><span style="color: #666666">(</span><span style="color: #40a070">2</span><span style="color: #666666">,</span> <span style="color: #40a070">4</span><span style="color: #666666">)</span>
+        <span style="color: #666666">);</span>
+        droid1<span style="color: #666666">.</span><span style="color: #4070a0">setRoutine</span><span style="color: #666666">(</span>brain1<span style="color: #666666">);</span>
+
+        Routine brain2 <span style="color: #666666">=</span> Routines<span style="color: #666666">.</span><span style="color: #4070a0">sequence</span><span style="color: #666666">(</span>
+            Routines<span style="color: #666666">.</span><span style="color: #4070a0">repeat</span><span style="color: #666666">(</span>Routines<span style="color: #666666">.</span><span style="color: #4070a0">wander</span><span style="color: #666666">(</span>board<span style="color: #666666">),</span> <span style="color: #40a070">4</span><span style="color: #666666">)</span>
+        <span style="color: #666666">);</span>
+        droid2<span style="color: #666666">.</span><span style="color: #4070a0">setRoutine</span><span style="color: #666666">(</span>brain2<span style="color: #666666">);</span>
+
+        <span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span><span style="color: #902000">int</span> i <span style="color: #666666">=</span> <span style="color: #40a070">0</span><span style="color: #666666">;</span> i <span style="color: #666666">&lt;</span> <span style="color: #40a070">30</span><span style="color: #666666">;</span> i<span style="color: #666666">++)</span> <span style="color: #666666">{</span>
+            System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span>droid1<span style="color: #666666">.</span><span style="color: #4070a0">toString</span><span style="color: #666666">());</span>
+            System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span>droid2<span style="color: #666666">.</span><span style="color: #4070a0">toString</span><span style="color: #666666">());</span>
+            droid1<span style="color: #666666">.</span><span style="color: #4070a0">update</span><span style="color: #666666">();</span>
+            droid2<span style="color: #666666">.</span><span style="color: #4070a0">update</span><span style="color: #666666">();</span>
+        <span style="color: #666666">}</span>
+    <span style="color: #666666">}</span>
+</pre></div>
+
+<p>Of course this is not the best solution by far but it&rsquo;s still better than the constant instantiation of routines. Ideally the AI should be scripted and loaded from an external source, either via scripting, or at least provided as a JSON for example and have a AI assembler create it. This way the game does not need to be recompiled every time the AI is tweaked. But again, it is not the scope of this article.</p>
+
+<p>Also, how shall we decide which action will take up a turn/tick or is evaluated instantly? One possible solution could be to allocate action points to the droid that it can spend one turn (tick if realtime) and for each action to assign a cost. Whenever the droid runs out of points, then we can move on. We&rsquo;d also need to track which routine is the current one so we can optimise the traversal of the tree. This is helpful if the AIs are very complex especially in realtime games.</p>
+
+<p>If you think the article was useful and want to get the code, please check the github repo. You can also check back because I intend to extend it and to update it so it evolves into a more complete AI example. As it is my first encounter with AI, there will be lots of things to improve and I am always open to criticism and ideas on how to improve.</p>
+
+<div class="download">
+  <p>
+    <a href="https://github.com/obviam/behavior-trees" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','github.com']);" title="https://github.com/obviam/behavior-trees">https://github.com/obviam/behavior-trees</a>
+  </p>
+</div>
+            </div>
+            
+            <div class="post-comments">
+                
+            </div>
+            
+            <div class="push"></div>
+        </div>
+        <footer class="footer text-center">
+<p>Copyright &copy; 2017 obviam.net -
+<span class="credit">
+	Powered by 
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and 
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+    </body>
