@@ -116,6 +116,48 @@ ga('create', 'UA-17403436-1', 'auto');
 					</div>
 				</li>
 				
+				<li>
+					<div class="post-list-item">
+						<div class="post-header">
+							<h4 class="post-link"><a href="https://obviam.github.io/the-state-pattern">Object Composition Strategies - The State Pattern</a></h4>
+							<h4 class="post-date">Mar 31, 2011</h4>
+						</div>
+						<div class="post-summary"><p><p>In this part I will try to explain how to design easily extensible and maintainable game elements that control their own internal state and behaviours.</p>
+
+<p>An internal state is best described as being the soul and mind of the entity. In the [first part][1] I described why composition is better than inheritance. In a nutshell composition provides the means to interchange the algorithms associated with their behaviours. State on the other hand helps objects to control their own behaviours.</p>
+
+<p></p></p></div>
+						<div class="post-list-footer text-center">
+							<a href="https://obviam.github.io/the-state-pattern">Read More</a>
+						</div>
+					</div>
+				</li>
+				
+				<li>
+					<div class="post-list-item">
+						<div class="post-header">
+							<h4 class="post-link"><a href="https://obviam.github.io/the-strategy-pattern">Object Composition Strategies - The Strategy Pattern</a></h4>
+							<h4 class="post-date">Dec 20, 2010</h4>
+						</div>
+						<div class="post-summary"><p><p>In this part I will try to explain what I understand on good game design elements.</p>
+
+<p>I will use droids in the examples and I will script a basic fight simulator to see how they behave.</p>
+
+<h4 id="the-problem">The problem:</h4>
+
+<p>I command a single robot and I want to obliterate my enemies. To face the same type of enemy all over again is boring. I need new challenges and this means new types of enemies. For example in the first level I want only to practice my target. So I need a pretty dumb enemy that does not do much but takes the shots. After I mastered that skill (shooting a helpless droid), I need a bit of a challenge and I want the enemy droid to fight back, but because I am still a beginner I don&rsquo;t want to die quickly so I need weak droids. After I am over with them I want a tougher challenge. I need better and stronger droids. Not just stronger, but different in behaviour as well as it can get boring killing the same type of enemy over and over again.</p>
+
+<h4 id="the-obvious-solution">The obvious solution:</h4>
+
+<p>Create 3 classes for the 3 types of enemy droids. To keep it simple, each droid has 2 abilities: <em>move</em> and <em>attack</em>. It makes sense to create a <code>Droid</code> interface with these two methods and have each droid implement them.</p>
+
+<p></p></p></div>
+						<div class="post-list-footer text-center">
+							<a href="https://obviam.github.io/the-strategy-pattern">Read More</a>
+						</div>
+					</div>
+				</li>
+				
 
 			</ul>
 			<div class="push"></div>

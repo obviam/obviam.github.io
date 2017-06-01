@@ -331,14 +331,16 @@ otherwise pick a random adjacent tile and move there
 &lt;p&gt;The check for &lt;code&gt;isRunning()&lt;/code&gt; is made to make sure that the routine only acts if the routine is active and hasn&amp;rsquo;t finished.&lt;/p&gt;
 
 &lt;p&gt;We also need to fill in the &lt;code&gt;Droid&lt;/code&gt;&amp;#8216;s &lt;code&gt;update&lt;/code&gt; method to make it use the routine. It&amp;rsquo;s just a simple delegation. This is how it looks like:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;update&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;routine&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getState&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
-            &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// hasn&amp;#39;t started yet so we start it&lt;/span&gt;
-            routine&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;start&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
-        &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
-        routine&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;act&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; board&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;1 &lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;update&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;2 &lt;/span&gt;        &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;routine&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getState&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;3 &lt;/span&gt;            &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// hasn&amp;#39;t started yet so we start it&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;4 &lt;/span&gt;            routine&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;start&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;5 &lt;/span&gt;        &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;6 &lt;/span&gt;        routine&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;act&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; board&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;7 &lt;/span&gt;    &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
+
 
 &lt;p&gt;It should consist only of line &lt;strong&gt;#6&lt;/strong&gt; but I also put in a check to see if the state is &lt;code&gt;null&lt;/code&gt; and if so, then &lt;code&gt;start&lt;/code&gt; the routine. This is a hack to start the routine the first time &lt;code&gt;update&lt;/code&gt; is called.&lt;/p&gt;
 
@@ -394,9 +396,8 @@ otherwise pick a random adjacent tile and move there
 
 &lt;p&gt;Running the &lt;code&gt;Test&lt;/code&gt; we see the following printed to the sysout:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;
-Droid{name=MyDroid, x=5, y=5, health=10, range=2, damage=1}
-Starting routine: MoveTo
+&lt;pre&gt;&lt;code&gt;Droid{name=MyDroid, x=5, y=5, health=10, range=2, damage=1}
+&amp;gt;&amp;gt;&amp;gt; Starting routine: MoveTo
 Droid{name=MyDroid, x=6, y=6, health=10, range=2, damage=1}
 Droid{name=MyDroid, x=7, y=7, health=10, range=2, damage=1}
 Droid{name=MyDroid, x=7, y=8, health=10, range=2, damage=1}
@@ -551,7 +552,7 @@ Droid{name=MyDroid, x=7, y=9, health=10, range=2, damage=1}
 &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;The code is easy to follow but I&amp;rsquo;ll explain a few things that were added.&lt;/p&gt;
+&lt;p&gt;The code is easy to follow but I will explain a few things that were added.&lt;/p&gt;
 
 &lt;p&gt;The attribute &lt;code&gt;routine&lt;/code&gt; is passed in the constructor and that will be the routine that gets repeated. The &lt;code&gt;originalTimes&lt;/code&gt; is a storage variable that holds the initial number of times value, so we can restart the routine with the &lt;code&gt;reset()&lt;/code&gt; call. This is just a back-up of the initial state.&lt;/p&gt;
 

@@ -410,14 +410,16 @@ otherwise pick a random adjacent tile and move there
 <p>The check for <code>isRunning()</code> is made to make sure that the routine only acts if the routine is active and hasn&rsquo;t finished.</p>
 
 <p>We also need to fill in the <code>Droid</code>&#8216;s <code>update</code> method to make it use the routine. It&rsquo;s just a simple delegation. This is how it looks like:</p>
-<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">update</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
-        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>routine<span style="color: #666666">.</span><span style="color: #4070a0">getState</span><span style="color: #666666">()</span> <span style="color: #666666">==</span> <span style="color: #007020; font-weight: bold">null</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
-            <span style="color: #60a0b0; font-style: italic">// hasn&#39;t started yet so we start it</span>
-            routine<span style="color: #666666">.</span><span style="color: #4070a0">start</span><span style="color: #666666">();</span>
-        <span style="color: #666666">}</span>
-        routine<span style="color: #666666">.</span><span style="color: #4070a0">act</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">,</span> board<span style="color: #666666">);</span>
-    <span style="color: #666666">}</span>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">1 </span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">update</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">2 </span>        <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>routine<span style="color: #666666">.</span><span style="color: #4070a0">getState</span><span style="color: #666666">()</span> <span style="color: #666666">==</span> <span style="color: #007020; font-weight: bold">null</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">3 </span>            <span style="color: #60a0b0; font-style: italic">// hasn&#39;t started yet so we start it</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">4 </span>            routine<span style="color: #666666">.</span><span style="color: #4070a0">start</span><span style="color: #666666">();</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">5 </span>        <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">6 </span>        routine<span style="color: #666666">.</span><span style="color: #4070a0">act</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">,</span> board<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">7 </span>    <span style="color: #666666">}</span>
 </pre></div>
+
 
 <p>It should consist only of line <strong>#6</strong> but I also put in a check to see if the state is <code>null</code> and if so, then <code>start</code> the routine. This is a hack to start the routine the first time <code>update</code> is called.</p>
 
@@ -473,9 +475,8 @@ otherwise pick a random adjacent tile and move there
 
 <p>Running the <code>Test</code> we see the following printed to the sysout:</p>
 
-<pre><code>
-Droid{name=MyDroid, x=5, y=5, health=10, range=2, damage=1}
-Starting routine: MoveTo
+<pre><code>Droid{name=MyDroid, x=5, y=5, health=10, range=2, damage=1}
+&gt;&gt;&gt; Starting routine: MoveTo
 Droid{name=MyDroid, x=6, y=6, health=10, range=2, damage=1}
 Droid{name=MyDroid, x=7, y=7, health=10, range=2, damage=1}
 Droid{name=MyDroid, x=7, y=8, health=10, range=2, damage=1}
@@ -630,7 +631,7 @@ Droid{name=MyDroid, x=7, y=9, health=10, range=2, damage=1}
 <span style="color: #666666">}</span>
 </pre></div>
 
-<p>The code is easy to follow but I&rsquo;ll explain a few things that were added.</p>
+<p>The code is easy to follow but I will explain a few things that were added.</p>
 
 <p>The attribute <code>routine</code> is passed in the constructor and that will be the routine that gets repeated. The <code>originalTimes</code> is a storage variable that holds the initial number of times value, so we can restart the routine with the <code>reset()</code> call. This is just a back-up of the initial state.</p>
 

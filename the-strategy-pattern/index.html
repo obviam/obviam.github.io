@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> Object Composition Strategies - The Strategy Pattern &middot; Obviam - Game Development Tutorials and Musings in Software Development </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.13" />
+
+
+<script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://obviam.github.io/css/nix.css">
+
+ 
+<link href="https://fonts.googleapis.com/css?family=Inconsolata|Open+Sans|Roboto|Montserrat|Concert+One|Source+Code+Pro:400,700" rel="stylesheet">
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-17403436-1', 'auto');
+	  ga('send', 'pageview');
+
+</script>
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" id="green-terminal" href=https://obviam.github.io/>impaler@obviam.net ~ $</a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href="https://obviam.github.io/">/home/impaler</a>
+				</li>
+				
+				
+				<li >
+					<a href="/blog-tmp">~/blog</a>
+				</li>
+				
+				
+				<li >
+					<a href="/plan">~/.plan</a>
+				</li>
+				
+				
+				<li >
+					<a href="/archive">~/archive</a>
+				</li>
+				
+				
+				<li >
+					<a href="/about">~/about</a>
+				</li>
+				
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="container wrapper">
+            <h1><a href="https://obviam.github.io/the-strategy-pattern">Object Composition Strategies - The Strategy Pattern</a></h1>
+            <span class="post-date">Dec 20, 2010 </span>
+            <div class="post-content">
+                <p>In this part I will try to explain what I understand on good game design elements.</p>
+
+<p>I will use droids in the examples and I will script a basic fight simulator to see how they behave.</p>
+
+<h4 id="the-problem">The problem:</h4>
+
+<p>I command a single robot and I want to obliterate my enemies. To face the same type of enemy all over again is boring. I need new challenges and this means new types of enemies. For example in the first level I want only to practice my target. So I need a pretty dumb enemy that does not do much but takes the shots. After I mastered that skill (shooting a helpless droid), I need a bit of a challenge and I want the enemy droid to fight back, but because I am still a beginner I don&rsquo;t want to die quickly so I need weak droids. After I am over with them I want a tougher challenge. I need better and stronger droids. Not just stronger, but different in behaviour as well as it can get boring killing the same type of enemy over and over again.</p>
+
+<h4 id="the-obvious-solution">The obvious solution:</h4>
+
+<p>Create 3 classes for the 3 types of enemy droids. To keep it simple, each droid has 2 abilities: <em>move</em> and <em>attack</em>. It makes sense to create a <code>Droid</code> interface with these two methods and have each droid implement them.</p>
+
+<p></p>
+
+<p>They can <strong>move</strong> and <strong>shoot</strong>. Well, not all of them but we can provide an empty implementation for the ones that do nothing.</p>
+
+<h5 id="the-droid-types">The droid types:</h5>
+
+<ul>
+<li><strong>Decoy Droid</strong> - will have no weapon and can&rsquo;t move.</li>
+<li><strong>Scout Droid</strong> - will have a weak weapon and moves fast.</li>
+<li><strong>Assault Droid</strong> - will have a heavy weapon and moves slowly.</li>
+</ul>
+
+<p>Looking at the 3 types we can implement the following simple class diagram:</p>
+
+<p><img src="/images/archive/2010/12/composition.bad_.jpg" alt="The Droid interface" /></p>
+
+<blockquote>
+<p>Implementing the Droid interface</p>
+</blockquote>
+
+<p>The interface has 3 simple methods which the droids need to implement:</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">interface</span> <span style="color: #0e84b5; font-weight: bold">Droid</span> <span style="color: #666666">{</span>
+
+	<span style="color: #60a0b0; font-style: italic">// display some info of the droid</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">display</span><span style="color: #666666">();</span>
+	
+	<span style="color: #60a0b0; font-style: italic">// move the droid</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">move</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">);</span>
+	
+	<span style="color: #60a0b0; font-style: italic">// attack position</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">shoot</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">);</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>The 3 classes are as follow:</p>
+
+<p><code>DecoyDroid.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">DecoyDroid</span> <span style="color: #007020; font-weight: bold">implements</span> Droid <span style="color: #666666">{</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">display</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;I am a DECOY droid&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+		<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">move</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Can&#39;t move.&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">shoot</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Have no weapon.&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><code>ScoutDroid.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">ScoutDroid</span> <span style="color: #007020; font-weight: bold">implements</span> Droid <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> damage <span style="color: #666666">=</span> <span style="color: #40a070">0.5f</span><span style="color: #666666">;</span>
+	
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">display</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;I am a scout droid&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">move</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Moving QUICKLY to: &quot;</span> <span style="color: #666666">+</span> x <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;,&quot;</span> <span style="color: #666666">+</span> y <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;.&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">shoot</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Light Laser Canon targeting: &quot;</span> <span style="color: #666666">+</span> x <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;,&quot;</span> <span style="color: #666666">+</span> y
+				<span style="color: #666666">+</span> <span style="color: #4070a0">&quot;. Damage: &quot;</span> <span style="color: #666666">+</span> damage<span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><code>AssaultDroid.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">AssaultDroid</span> <span style="color: #007020; font-weight: bold">implements</span> Droid <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> 	damage <span style="color: #666666">=</span> <span style="color: #40a070">2.5f</span><span style="color: #666666">;</span>
+	<span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">boolean</span> loaded <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">true</span><span style="color: #666666">;</span>
+	
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">display</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;I am an ASSAULT droid&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">move</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Moving SLOWLY to: &quot;</span> <span style="color: #666666">+</span> x <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;,&quot;</span> <span style="color: #666666">+</span> y <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;.&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">shoot</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>loaded<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Heavy laser targeting: &quot;</span> <span style="color: #666666">+</span> x <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;,&quot;</span> <span style="color: #666666">+</span> y
+					<span style="color: #666666">+</span> <span style="color: #4070a0">&quot;. Damage: &quot;</span> <span style="color: #666666">+</span> damage<span style="color: #666666">);</span>
+			loaded <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">false</span><span style="color: #666666">;</span>
+		<span style="color: #666666">}</span> <span style="color: #007020; font-weight: bold">else</span> <span style="color: #666666">{</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Reloading...&quot;</span><span style="color: #666666">);</span>
+			loaded <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">true</span><span style="color: #666666">;</span>
+		<span style="color: #666666">}</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>Both <code>ScoutDroid</code> and <code>AssaultDroid</code> have the argument <code>damage</code>. This holds the value of the damage inflicted by them.</p>
+
+<p>To give the <code>AssaultDroid</code> a heavy weapon with a slow reload time we added the <code>loaded</code> variable. This way it takes the assault droid two turns to fire its weapon once.</p>
+
+<p>I have created a simple simulator for the droids to take turns to move and shoot.</p>
+
+<p>Run the simulator for this design:</p>
+
+<p><code>BadDroidSimulator.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">BadDroidSimulator</span> <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> <span style="color: #902000">void</span> <span style="color: #06287e">main</span><span style="color: #666666">(</span>String<span style="color: #666666">[]</span> args<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		<span style="color: #60a0b0; font-style: italic">// for generating random numbers</span>
+		Random rand <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Random<span style="color: #666666">();</span>
+		
+		Droid scout <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> ScoutDroid<span style="color: #666666">();</span>
+		Droid assailant <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> AssaultDroid<span style="color: #666666">();</span>
+		Droid decoy <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> DecoyDroid<span style="color: #666666">();</span>
+		
+		scout<span style="color: #666666">.</span><span style="color: #4070a0">display</span><span style="color: #666666">();</span>
+		assailant<span style="color: #666666">.</span><span style="color: #4070a0">display</span><span style="color: #666666">();</span>
+		decoy<span style="color: #666666">.</span><span style="color: #4070a0">display</span><span style="color: #666666">();</span>
+		
+		<span style="color: #60a0b0; font-style: italic">// shoot-out - each droid fires once per turn</span>
+		<span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span><span style="color: #902000">int</span> i <span style="color: #666666">=</span> <span style="color: #40a070">1</span><span style="color: #666666">;</span> i <span style="color: #666666">&lt;=</span> <span style="color: #40a070">5</span><span style="color: #666666">;</span> i<span style="color: #666666">++)</span> <span style="color: #666666">{</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;\n&lt;=== BEGIN TURN &quot;</span> <span style="color: #666666">+</span> i <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; ===&gt;&quot;</span><span style="color: #666666">);</span>
+			scout<span style="color: #666666">.</span><span style="color: #4070a0">shoot</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>	<span style="color: #60a0b0; font-style: italic">// we assume this is an enemy position</span>
+			scout<span style="color: #666666">.</span><span style="color: #4070a0">move</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">();</span>
+			assailant<span style="color: #666666">.</span><span style="color: #4070a0">shoot</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>
+			assailant<span style="color: #666666">.</span><span style="color: #4070a0">move</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">();</span>
+			decoy<span style="color: #666666">.</span><span style="color: #4070a0">shoot</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>
+			decoy<span style="color: #666666">.</span><span style="color: #4070a0">move</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;&lt;=== END TURN &quot;</span> <span style="color: #666666">+</span> i <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; ===&gt;&quot;</span><span style="color: #666666">);</span>
+		<span style="color: #666666">}</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>The result (console output) will look like this:</p>
+
+<pre><code>I am a scout droid
+I am an ASSAULT droid
+I am a DECOY droid 
+&lt;=== BEGIN TURN 1 ===&gt;
+Light Laser Canon targeting: 9,0. Damage: 0.5
+Moving QUICKLY to: 4,6.
+Heavy laser targeting: 6,2. Damage: 2.5
+Moving SLOWLY to: 9,1.
+Have no weapon.
+Can't move.
+&lt;=== END TURN 1 ===&gt;
+&lt;=== BEGIN TURN 2 ===&gt;
+Light Laser Canon targeting: 3,4. Damage: 0.5
+Moving QUICKLY to: 6,5.
+Reloading&amp;#8230;
+Moving SLOWLY to: 1,6.
+Have no weapon.
+Can't move.
+&lt;=== END TURN 2 ===&gt;
+&lt;=== BEGIN TURN 3 ===&gt;
+Light Laser Canon targeting: 6,7. Damage: 0.5
+Moving QUICKLY to: 9,7.
+Heavy laser targeting: 7,1. Damage: 2.5
+Moving SLOWLY to: 2,0.
+Have no weapon.
+Can't move.
+&lt;=== END TURN 3 ===&gt;
+&lt;=== BEGIN TURN 4 ===&gt;
+Light Laser Canon targeting: 3,7. Damage: 0.5
+Moving QUICKLY to: 1,4.
+Reloading&amp;#8230;Moving SLOWLY to: 5,9.
+Have no weapon.
+Can't move.
+&lt;=== END TURN 4 ===&gt;
+&lt;=== BEGIN TURN 5 ===&gt;
+Light Laser Canon targeting: 0,8. Damage: 0.5
+Moving QUICKLY to: 3,9.
+Heavy laser targeting: 1,2. Damage: 2.5
+Moving SLOWLY to: 3,2.
+Have no weapon.
+Can't move.
+&lt;=== END TURN 5 ===&gt; 
+</code></pre>
+
+<p>####Challenges to extend the design</p>
+
+<p>The droids take turns to move and shoot. This is all good, but:
+* What if you want to create a hybrid droid? A droid that moves as fast as the scout but with a heavy weapon?</p>
+
+<p>You will have to create a new class and copy paste the respective methods from the Scout and Assault droid, right?
+* Also imagine that the shooting mechanism is not that simple and it needs collision detection and so on. For each droid the same redundant code needs to be rewritten.
+* What if the fire power could be enhanced with power ups?
+* What if the droid gains self-conscientiousness and finds a weapon to use it instead of the current one?</p>
+
+<p>I am sure you have plenty ideas on how to enhance the gameplay and extend the world but the most obvious solution (described above) seems ill-suited for this. It requires new droid classes to be created and each droid type will implement its methods separately. Many of these methods are identical. The current design doesn&rsquo;t allow you to change the droid&rsquo;s internals at runtime without significant effort.</p>
+
+<p>Here is one proposed solution: <strong>[Composition](&ldquo;<a href="http://en.wikipedia.org/wiki/Object_composition&quot;">http://en.wikipedia.org/wiki/Object_composition&quot;</a>)</strong> and the <strong><a href="http://en.wikipedia.org/wiki/Strategy_pattern">Strategy Pattern</a></strong>.</p>
+
+<p>####Designing a Droid (properly)</p>
+
+<p>A very simple droid consists of a <strong>weapon</strong> put on a <strong>chassis</strong>. The first design consisted of a <strong>&#8220;is a&#8221;</strong> type relationship. A <code>ScoutDroid</code> <strong>is a</strong> generic <code>Droid</code> with some peculiarities.</p>
+
+<p>Composition is based on <strong>&#8220;has a&#8221;</strong> relationships.</p>
+
+<p>A Droid <strong>has a</strong> <strong>Chassis</strong>. A Droid <strong>has a</strong> <strong>Weapon</strong>. What type of components a droid has, determines its type.</p>
+
+<p>Let&rsquo;s decompose the Scout Droid for example.</p>
+
+<p>The <strong>Scout Droid</strong> <strong>is a</strong> <strong>Droid</strong> which <strong>has a</strong> <strong>Light Laser Canon</strong> <strong>has a</strong> set of <strong>Wheels</strong> to move. We want to make the scout move quickly with a light weapon.</p>
+
+<p>The <strong>Assault Droid</strong> on the other hand is a Droid too but it has a <strong>Heavy Laser Canon</strong> and it runs on <strong>Tracks</strong>. This makes it extremely powerful but a bit slow.</p>
+
+<p>Think from a factory perspective. How does a car production line work? You get the chassis with a specific place for the engine, wheels, drive-shaft, gear-box and so on.</p>
+
+<p>All these components are produced separately. The teams that produce them have no idea of the other parts. They must fulfil one criteria: the gearbox must fit in perfectly in its place and connected up with the engine.. Different makes have different ways of doing this. The connector in this instance is the <strong>interface</strong>.</p>
+
+<p>The engine has a similar story. If it hooks up nicely with the wheels and gearbox then it can be fitted. Its internal design, capacity, power, fuel consumption can be completely different. The engine is one of the car&rsquo;s components.</p>
+
+<p>So is our droid. But to keep it simple we have only 2 components. We need one generic droid that has all the wirings built so its components will be triggered by the droid through those interfaces. For example a droid needs to only pull the trigger of the weapon and doesn&rsquo;t care what type of weapon it is as long as it has a trigger. The droid needs to understand the <strong>pullTrigger</strong> method and to do this it needs to be implemented, in order for us to give weapons to the droid to use.</p>
+
+<p>The same thing with the changing of location. It needs to trigger the movement. The wheels or track or anti-gravity propulsion will take the droid there. The droid only needs to set the coordinates.</p>
+
+<p>To fulfil this we need a class with implemented methods instead of an interface.</p>
+
+<p>We create the abstract <code>Droid</code> class. We make it abstract because we actually implement the methods that trigger the weapon, and action the moving mechanism but we don&rsquo;t have concrete weapons and movement mechanisms attached to the droid. The assembly of a concrete droid will be delegated to the type constructor along with the description method.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">abstract</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Droid</span> <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">protected</span> Weapon 	weapon<span style="color: #666666">;</span>		<span style="color: #60a0b0; font-style: italic">// the weapon which will be used in fights</span>
+	<span style="color: #007020; font-weight: bold">protected</span> Chassis	chassis<span style="color: #666666">;</span>	<span style="color: #60a0b0; font-style: italic">// the chassis on which the droid is placed</span>
+
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">moveToPosition</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">print</span><span style="color: #666666">(</span>id <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; &gt; &quot;</span> <span style="color: #666666">);</span>
+		chassis<span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span><span style="color: #666666">(</span>x<span style="color: #666666">,</span> y<span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic">	 *  Engages the position on the screen whether it is occupied by</span>
+<span style="color: #60a0b0; font-style: italic">	 *  an enemy or not. Each strategy should decide how to do it. </span>
+<span style="color: #60a0b0; font-style: italic">	 */</span> 
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">attackPosition</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">print</span><span style="color: #666666">(</span>id <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; &gt; &quot;</span><span style="color: #666666">);</span>
+		weapon<span style="color: #666666">.</span><span style="color: #4070a0">useWeapon</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">new</span> Vector2f<span style="color: #666666">(</span>x<span style="color: #666666">,</span> y<span style="color: #666666">));</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic">	 * Displays some info on the droid</span>
+<span style="color: #60a0b0; font-style: italic">	 */</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">abstract</span> <span style="color: #902000">void</span> <span style="color: #06287e">display</span><span style="color: #666666">();</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>If you examine the class you will see that the <code>Droid</code> has 3 methods from which 2 are implemented. It also has two <strong>components</strong>: <code>Weapon</code> and <code>Chassis</code>.</p>
+
+<p>The components are interfaces so the droid does not know what it is doing when triggering the actions on them. It is all delegated to the implementation.</p>
+
+<p>The interfaces are as follows:</p>
+
+<p><code>Weapon.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">interface</span> <span style="color: #0e84b5; font-weight: bold">Weapon</span> <span style="color: #666666">{</span>
+	<span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic">	 * The trigger to use the weapon.</span>
+<span style="color: #60a0b0; font-style: italic">	 * @param target - where on the map is the target</span>
+<span style="color: #60a0b0; font-style: italic">	 */</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">useWeapon</span><span style="color: #666666">(</span>Vector2f target<span style="color: #666666">);</span>
+	
+	<span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic">	 * Returns the description of the weapon</span>
+<span style="color: #60a0b0; font-style: italic">	 */</span>
+	<span style="color: #007020; font-weight: bold">public</span> String <span style="color: #06287e">getDescription</span><span style="color: #666666">();</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><code>Chassis.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">interface</span> <span style="color: #0e84b5; font-weight: bold">Chassis</span> <span style="color: #666666">{</span>
+	<span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic">	 * Delegates the movement to the supporting chassis and</span>
+<span style="color: #60a0b0; font-style: italic">	 * tries to move the unit to x,y</span>
+<span style="color: #60a0b0; font-style: italic">	 */</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">moveTo</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">);</span>
+	
+	<span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic">	 * Returns the description of the chassis</span>
+<span style="color: #60a0b0; font-style: italic">	 */</span>
+	<span style="color: #007020; font-weight: bold">public</span> String <span style="color: #06287e">getDescription</span><span style="color: #666666">();</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>We will enhance our base <code>Droid</code> class. We will add setter and getter methods for both <code>Weapon</code> and <code>Chassis</code>. This will allow us to change the droid&rsquo;s behaviour at runtime. This is what the <strong>strategy pattern</strong> is all about. A Droid has behaviours: it can use a <strong>weapon</strong> and it can <strong>move</strong>. These two strategies (behaviours) need to be implemented.</p>
+
+<p>We also add an <code>id</code> which will be unique in our game for each droid instance. I use a very simple id generation strategy. I increment the <code>nextId</code> static field and append it to the concrete droid type prefix in the constructor for each type.</p>
+
+<p>Here is the new <code>Droid</code> class:</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">abstract</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Droid</span> <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">protected</span> <span style="color: #007020; font-weight: bold">static</span> <span style="color: #902000">int</span> nextId	<span style="color: #666666">=</span> <span style="color: #40a070">0</span><span style="color: #666666">;</span>	<span style="color: #60a0b0; font-style: italic">// the next available ID</span>
+
+	<span style="color: #007020; font-weight: bold">protected</span> String 	id<span style="color: #666666">;</span>			<span style="color: #60a0b0; font-style: italic">// unique id</span>
+	<span style="color: #007020; font-weight: bold">protected</span> Weapon 	weapon<span style="color: #666666">;</span>		<span style="color: #60a0b0; font-style: italic">// the weapon which will be used in fights</span>
+	<span style="color: #007020; font-weight: bold">protected</span> Chassis	chassis<span style="color: #666666">;</span>	<span style="color: #60a0b0; font-style: italic">// the chassis on which the droid is placed</span>
+
+	<span style="color: #60a0b0; font-style: italic">// the unique ID of the droid in the game</span>
+	<span style="color: #007020; font-weight: bold">public</span> String <span style="color: #06287e">getId</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">return</span> id<span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #007020; font-weight: bold">public</span> Weapon <span style="color: #06287e">getWeapon</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">return</span> weapon<span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">setWeapon</span><span style="color: #666666">(</span>Weapon weapon<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">weapon</span> <span style="color: #666666">=</span> weapon<span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #007020; font-weight: bold">public</span> Chassis <span style="color: #06287e">getChassis</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">return</span> chassis<span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">setChassis</span><span style="color: #666666">(</span>Chassis chassis<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">chassis</span> <span style="color: #666666">=</span> chassis<span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">moveToPosition</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">print</span><span style="color: #666666">(</span>id <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; &gt; &quot;</span> <span style="color: #666666">);</span>
+		chassis<span style="color: #666666">.</span><span style="color: #4070a0">moveTo</span><span style="color: #666666">(</span>x<span style="color: #666666">,</span> y<span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic">	 *  Engages the position on the screen whether it is occupied by</span>
+<span style="color: #60a0b0; font-style: italic">	 *  an enemy or not. Each strategy should decide how to do it. </span>
+<span style="color: #60a0b0; font-style: italic">	 */</span> 
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">attackPosition</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">print</span><span style="color: #666666">(</span>id <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; &gt; &quot;</span><span style="color: #666666">);</span>
+		weapon<span style="color: #666666">.</span><span style="color: #4070a0">useWeapon</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">new</span> Vector2f<span style="color: #666666">(</span>x<span style="color: #666666">,</span> y<span style="color: #666666">));</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic">	 * Displays some info on the droid</span>
+<span style="color: #60a0b0; font-style: italic">	 */</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">abstract</span> <span style="color: #902000">void</span> <span style="color: #06287e">display</span><span style="color: #666666">();</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>####Let&rsquo;s build some weapons</p>
+
+<p><code>NoWeapon.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic"> * This is a null object. A null object is a dummy that does nothing and it </span>
+<span style="color: #60a0b0; font-style: italic"> * is a mere place-holder and eliminates the need to check for null.</span>
+<span style="color: #60a0b0; font-style: italic"> * @author impaler</span>
+<span style="color: #60a0b0; font-style: italic"> *</span>
+<span style="color: #60a0b0; font-style: italic"> */</span>
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">NoWeapon</span> <span style="color: #007020; font-weight: bold">implements</span> Weapon <span style="color: #666666">{</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">useWeapon</span><span style="color: #666666">(</span>Vector2f target<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		<span style="color: #60a0b0; font-style: italic">// We are doing nothing</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;No weapon equipped!&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> String <span style="color: #06287e">getDescription</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">return</span> <span style="color: #4070a0">&quot;Nothing&quot;</span><span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>This is the null object. The class description should give you an idea what it is.</p>
+
+<p><code>LightLaserCanon.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic"> * This is a light laser cannon whit a quick reload time and high accuracy</span>
+<span style="color: #60a0b0; font-style: italic"> * </span>
+<span style="color: #60a0b0; font-style: italic"> * @author impaler</span>
+<span style="color: #60a0b0; font-style: italic"> * </span>
+<span style="color: #60a0b0; font-style: italic"> */</span>
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">LightLaserCanon</span> <span style="color: #007020; font-weight: bold">implements</span> Weapon <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> damage <span style="color: #666666">=</span> <span style="color: #40a070">0.5f</span><span style="color: #666666">;</span> <span style="color: #60a0b0; font-style: italic">// the damage inflicted</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">useWeapon</span><span style="color: #666666">(</span>Vector2f target<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Shooting my laser canon to &quot;</span> <span style="color: #666666">+</span> <span style="color: #666666">(</span><span style="color: #902000">int</span><span style="color: #666666">)</span>target<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;,&quot;</span>
+				<span style="color: #666666">+</span> <span style="color: #666666">(</span><span style="color: #902000">int</span><span style="color: #666666">)</span>target<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;. Bang on! Done &quot;</span> <span style="color: #666666">+</span> damage <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; damage.&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> String <span style="color: #06287e">getDescription</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">return</span> <span style="color: #4070a0">&quot;First generation laser canon. Street use only!&quot;</span><span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><code>HeavyLaserCanon.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #60a0b0; font-style: italic">/**</span>
+<span style="color: #60a0b0; font-style: italic"> * This is a heavy assault laser cannon with high accuracy but slow reload time.</span>
+<span style="color: #60a0b0; font-style: italic"> * @author impaler</span>
+<span style="color: #60a0b0; font-style: italic"> */</span>
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">HeavyLaserCanon</span> <span style="color: #007020; font-weight: bold">implements</span> Weapon <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">boolean</span> loaded 	<span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">true</span><span style="color: #666666">;</span>	<span style="color: #60a0b0; font-style: italic">// after fire needs to be reloaded</span>
+	<span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> 	damage 	<span style="color: #666666">=</span> <span style="color: #40a070">1.5f</span><span style="color: #666666">;</span>	<span style="color: #60a0b0; font-style: italic">// the damage is considerable</span>
+	
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">useWeapon</span><span style="color: #666666">(</span>Vector2f target<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>loaded<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+			<span style="color: #60a0b0; font-style: italic">// we fire the canon</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Eat this! Laser beam hit target (&quot;</span> <span style="color: #666666">+</span> <span style="color: #666666">(</span><span style="color: #902000">int</span><span style="color: #666666">)</span>target<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;,&quot;</span> <span style="color: #666666">+</span> <span style="color: #666666">(</span><span style="color: #902000">int</span><span style="color: #666666">)</span>target<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;) and dealt &quot;</span> <span style="color: #666666">+</span> damage <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; damage.&quot;</span><span style="color: #666666">);</span>
+			<span style="color: #60a0b0; font-style: italic">// next time needs reloading</span>
+			loaded <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">false</span><span style="color: #666666">;</span>
+		<span style="color: #666666">}</span> <span style="color: #007020; font-weight: bold">else</span> <span style="color: #666666">{</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Darn! Out of ammo! Reloading...&quot;</span><span style="color: #666666">);</span>
+			loaded <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">true</span><span style="color: #666666">;</span>
+		<span style="color: #666666">}</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> String <span style="color: #06287e">getDescription</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">return</span> <span style="color: #4070a0">&quot;DASS-5000 - The ultimate in siege weaponry provided by Obviam Enterprises.&quot;</span><span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>You might notice the <code>Vector2f</code> class. This is a very basic 2D vector class which currently holds the x and y coordinates. Nothing more. You can find it in the downloaded source.</p>
+
+<p>####Let&rsquo;s build some chassis</p>
+
+<p>The <code>getDescription()</code> method says what the chassis is like.</p>
+
+<p><code>NoChassis.java</code> - null object (see weapons)</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">NoChassis</span> <span style="color: #007020; font-weight: bold">implements</span> Chassis <span style="color: #666666">{</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">moveTo</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;It&#39;s just a frame. Can&#39;t move.&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> String <span style="color: #06287e">getDescription</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">return</span> <span style="color: #4070a0">&quot;It&#39;s just a frame.&quot;</span><span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><code>SteelStand.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">SteelStand</span> <span style="color: #007020; font-weight: bold">implements</span> Chassis <span style="color: #666666">{</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">moveTo</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Can&#39;t move.&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> String <span style="color: #06287e">getDescription</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">return</span> <span style="color: #4070a0">&quot;Unmovable reinforced steel stand ideal for turrets and defensive units.&quot;</span><span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><code>Wheels.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Wheels</span> <span style="color: #007020; font-weight: bold">implements</span> Chassis <span style="color: #666666">{</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">moveTo</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Speeding to &quot;</span> <span style="color: #666666">+</span> x <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;,&quot;</span> <span style="color: #666666">+</span> y <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; on my wheels!&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> String <span style="color: #06287e">getDescription</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">return</span> <span style="color: #4070a0">&quot;4 wheel drive, very fast on flat terrain but struggling through obstacles.&quot;</span><span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><code>Track.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Track</span> <span style="color: #007020; font-weight: bold">implements</span> Chassis <span style="color: #666666">{</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">moveTo</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;Don&#39;t get in my way! Moving slowly to: &quot;</span> <span style="color: #666666">+</span> x <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;,&quot;</span> <span style="color: #666666">+</span> y <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;.&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> String <span style="color: #06287e">getDescription</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		<span style="color: #007020; font-weight: bold">return</span> <span style="color: #4070a0">&quot;Slow moving tracks but able to go through many obstacles.&quot;</span><span style="color: #666666">;</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>####Now we can assemble our droids</p>
+
+<p>First let&rsquo;s create a <code>DecoyDroid</code>. This droid will have no weapon and will be placed on a steel stand. It&rsquo;s for our target practice, remember?</p>
+
+<p><code>DecoyDroid.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">DecoyDroid</span> <span style="color: #007020; font-weight: bold">extends</span> Droid <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">DecoyDroid</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		id <span style="color: #666666">=</span> <span style="color: #4070a0">&quot;DCY-&quot;</span> <span style="color: #666666">+</span> <span style="color: #666666">(++</span>Droid<span style="color: #666666">.</span><span style="color: #4070a0">nextId</span><span style="color: #666666">);</span> 
+		weapon <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> NoWeapon<span style="color: #666666">();</span>
+		chassis <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> SteelStand<span style="color: #666666">();</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">display</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;+--------------------------------------------------------------------------------------------+&quot;</span><span style="color: #666666">);</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;| I am a DECOY droid.&quot;</span><span style="color: #666666">);</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;|\tID: &quot;</span> <span style="color: #666666">+</span> id<span style="color: #666666">);</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;|\tWeapon: &quot;</span> <span style="color: #666666">+</span> weapon<span style="color: #666666">.</span><span style="color: #4070a0">getDescription</span><span style="color: #666666">());</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;|\tChassis: &quot;</span> <span style="color: #666666">+</span> chassis<span style="color: #666666">.</span><span style="color: #4070a0">getDescription</span><span style="color: #666666">());</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;+--------------------------------------------------------------------------------------------+&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>Examine the default constructor. It creates an <code>id</code> and assigns an instance of <code>NoWeapon</code> and <code>SteelStand</code> to the droid.</p>
+
+<p>The <code>display()</code> method is more elaborate than before but just to describe the droid better. It makes use of the components&rsquo; descriptions too.</p>
+
+<p>If you instantiate a <code>DecoyDroid</code> and call its display method you will get a nice description of it.</p>
+
+<pre><code>+--------------------------------------------------------------------------------------------+
+| I am a DECOY droid. 
+| ID: DCY-3
+| Weapon: Nothing 
+| Chassis: Unmovable reinforced steel stand ideal for turrets and defensive units. 
++--------------------------------------------------------------------------------------------+
+</code></pre>
+
+<p>Let&rsquo;s build the rest of the types:</p>
+
+<p><code>ScoutDroid.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">ScoutDroid</span> <span style="color: #007020; font-weight: bold">extends</span> Droid <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">ScoutDroid</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		id <span style="color: #666666">=</span> <span style="color: #4070a0">&quot;SCT-&quot;</span> <span style="color: #666666">+</span> <span style="color: #666666">(++</span>Droid<span style="color: #666666">.</span><span style="color: #4070a0">nextId</span><span style="color: #666666">);</span> 
+		weapon <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> LightLaserCanon<span style="color: #666666">();</span>
+		chassis <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Wheels<span style="color: #666666">();</span>
+	<span style="color: #666666">}</span>
+
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">display</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;+--------------------------------------------------------------------------------------------+&quot;</span><span style="color: #666666">);</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;| I am a SCOUT droid.&quot;</span><span style="color: #666666">);</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;|\tID: &quot;</span> <span style="color: #666666">+</span> id<span style="color: #666666">);</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;|\tWeapon: &quot;</span> <span style="color: #666666">+</span> weapon<span style="color: #666666">.</span><span style="color: #4070a0">getDescription</span><span style="color: #666666">());</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;|\tChassis: &quot;</span> <span style="color: #666666">+</span> chassis<span style="color: #666666">.</span><span style="color: #4070a0">getDescription</span><span style="color: #666666">());</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;+--------------------------------------------------------------------------------------------+&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><code>AssaultDroid.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">AssaultDroid</span> <span style="color: #007020; font-weight: bold">extends</span> Droid <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">AssaultDroid</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		id <span style="color: #666666">=</span> <span style="color: #4070a0">&quot;ASS-&quot;</span> <span style="color: #666666">+</span> <span style="color: #666666">(++</span>Droid<span style="color: #666666">.</span><span style="color: #4070a0">nextId</span><span style="color: #666666">);</span> 
+		weapon <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> HeavyLaserCanon<span style="color: #666666">();</span>
+		chassis <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Track<span style="color: #666666">();</span>
+	<span style="color: #666666">}</span>
+	
+	<span style="color: #555555; font-weight: bold">@Override</span>
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">display</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;+--------------------------------------------------------------------------------------------+&quot;</span><span style="color: #666666">);</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;| I am an ASSAULT droid.&quot;</span><span style="color: #666666">);</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;|\tID: &quot;</span> <span style="color: #666666">+</span> id<span style="color: #666666">);</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;|\tWeapon: &quot;</span> <span style="color: #666666">+</span> weapon<span style="color: #666666">.</span><span style="color: #4070a0">getDescription</span><span style="color: #666666">());</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;|\tChassis: &quot;</span> <span style="color: #666666">+</span> chassis<span style="color: #666666">.</span><span style="color: #4070a0">getDescription</span><span style="color: #666666">());</span>
+		System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;+--------------------------------------------------------------------------------------------+&quot;</span><span style="color: #666666">);</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>You will notice that the only things needed to be implemented are the constructor - which adds the chassis and weapon - and the <code>display()</code> method.</p>
+
+<p>The following diagram shows the new architecture:</p>
+
+<p><img src="/images/archive/2010/12/Droids.comp_.jpg" alt="Strategy Pattern" /></p>
+
+<blockquote>
+<p>Strategy Pattern</p>
+</blockquote>
+
+<p>Let&rsquo;s create a test script for it. We&rsquo;ll simulate 5 turns in which each droid will use its weapon and move to a random location.</p>
+
+<p>Check the behaviour of each weapon and you will notice that the heavy laser will fire once every 2 turns.</p>
+
+<p>To make it interesting, in turn 4 we give a <code>HeavyLaserCanon</code> to <code>DecoyDroid</code>. Look at how it changes the droid&rsquo;s behaviour and it starts firing. This is a hybrid droid created on the fly at runtime.</p>
+
+<p>The simulator code (<code>DroidSimulator.java</code>):</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">DroidSimulator</span> <span style="color: #666666">{</span>
+
+	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> <span style="color: #902000">void</span> <span style="color: #06287e">main</span><span style="color: #666666">(</span>String<span style="color: #666666">[]</span> args<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+		<span style="color: #60a0b0; font-style: italic">// for generating random numbers</span>
+		Random rand <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Random<span style="color: #666666">();</span>
+		
+		Droid scout <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> ScoutDroid<span style="color: #666666">();</span>
+		Droid assailant <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> AssaultDroid<span style="color: #666666">();</span>
+		Droid decoy <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> DecoyDroid<span style="color: #666666">();</span>
+		
+		scout<span style="color: #666666">.</span><span style="color: #4070a0">display</span><span style="color: #666666">();</span>
+		assailant<span style="color: #666666">.</span><span style="color: #4070a0">display</span><span style="color: #666666">();</span>
+		decoy<span style="color: #666666">.</span><span style="color: #4070a0">display</span><span style="color: #666666">();</span>
+		
+		<span style="color: #60a0b0; font-style: italic">// shoot-out - each droid fires once per turn</span>
+		<span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span><span style="color: #902000">int</span> i <span style="color: #666666">=</span> <span style="color: #40a070">1</span><span style="color: #666666">;</span> i <span style="color: #666666">&lt;=</span> <span style="color: #40a070">5</span><span style="color: #666666">;</span> i<span style="color: #666666">++)</span> <span style="color: #666666">{</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;\n&lt;=== BEGIN TURN &quot;</span> <span style="color: #666666">+</span> i <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; ===&gt;&quot;</span><span style="color: #666666">);</span>
+			<span style="color: #60a0b0; font-style: italic">// in turn 3 decoy droid is given an assault canon</span>
+			<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>i <span style="color: #666666">==</span> <span style="color: #40a070">4</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+				decoy<span style="color: #666666">.</span><span style="color: #4070a0">setWeapon</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">new</span> HeavyLaserCanon<span style="color: #666666">());</span>
+				System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;* &quot;</span> <span style="color: #666666">+</span> decoy<span style="color: #666666">.</span><span style="color: #4070a0">getId</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; acquired &quot;</span> <span style="color: #666666">+</span> decoy<span style="color: #666666">.</span><span style="color: #4070a0">getWeapon</span><span style="color: #666666">().</span><span style="color: #4070a0">getDescription</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> <span style="color: #4070a0">&quot;\n&quot;</span><span style="color: #666666">);</span>
+			<span style="color: #666666">}</span>
+			scout<span style="color: #666666">.</span><span style="color: #4070a0">attackPosition</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>	<span style="color: #60a0b0; font-style: italic">// we assume this is an enemy position</span>
+			scout<span style="color: #666666">.</span><span style="color: #4070a0">moveToPosition</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">();</span>
+			assailant<span style="color: #666666">.</span><span style="color: #4070a0">attackPosition</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>
+			assailant<span style="color: #666666">.</span><span style="color: #4070a0">moveToPosition</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">();</span>
+			decoy<span style="color: #666666">.</span><span style="color: #4070a0">attackPosition</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>
+			decoy<span style="color: #666666">.</span><span style="color: #4070a0">moveToPosition</span><span style="color: #666666">(</span>rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">),</span> rand<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span><span style="color: #40a070">10</span><span style="color: #666666">));</span>
+			System<span style="color: #666666">.</span><span style="color: #4070a0">out</span><span style="color: #666666">.</span><span style="color: #4070a0">println</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;&lt;=== END TURN &quot;</span> <span style="color: #666666">+</span> i <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; ===&gt;&quot;</span><span style="color: #666666">);</span>
+		<span style="color: #666666">}</span>
+	<span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>The output:</p>
+
+<pre><code>+--------------------------------------------------------------------------------------------+
+| I am a SCOUT droid.
+| ID: SCT-1
+| Weapon: First generation laser canon. Street use only!
+| Chassis: 4 wheel drive, very fast on flat terrain but struggling through obstacles.
++--------------------------------------------------------------------------------------------+
++--------------------------------------------------------------------------------------------+
+| I am an ASSAULT droid.
+| ID: ASS-2
+| Weapon: DASS-5000 - The ultimate in siege weaponry provided by Obviam Enterprises.
+| Chassis: Slow moving tracks but able to go through many obstacles.
++--------------------------------------------------------------------------------------------+
++--------------------------------------------------------------------------------------------+
+| I am a DECOY droid.
+| ID: DCY-3
+| Weapon: Nothing
+| Chassis: Unmovable reinforced steel stand ideal for turrets and defensive units.
++--------------------------------------------------------------------------------------------+
+&lt;=== BEGIN TURN 1 ===&gt;
+SCT-1 &gt; Shooting my laser canon to 0,3. Bang on! Done 0.5 damage.
+SCT-1 &gt; Speeding to 0,2 on my wheels!
+ASS-2 &gt; Eat this! Laser beam hit target (3,4) and dealt 1.5 damage.
+ASS-2 &gt; Don't get in my way! Moving slowly to: 3,8.
+DCY-3 &gt; No weapon equipped!
+DCY-3 &gt; Can't move.
+&lt;=== END TURN 1 ===&gt;
+&lt;=== BEGIN TURN 2 ===&gt;
+SCT-1 &gt; Shooting my laser canon to 4,0. Bang on! Done 0.5 damage.
+SCT-1 &gt; Speeding to 5,0 on my wheels!
+ASS-2 &gt; Darn! Out of ammo! Reloading!
+ASS-2 &gt; Don't get in my way! Moving slowly to: 1,6.
+DCY-3 &gt; No weapon equipped!
+DCY-3 &gt; Can't move.
+&lt;=== END TURN 2 ===&gt;
+&lt;=== BEGIN TURN 3 ===&gt;
+SCT-1 &gt; Shooting my laser canon to 3,0. Bang on! Done 0.5 damage.
+SCT-1 &gt; Speeding to 0,6 on my wheels!
+ASS-2 &gt; Eat this! Laser beam hit target (9,1) and dealt 1.5 damage.
+ASS-2 &gt; Don't get in my way! Moving slowly to: 8,0.
+DCY-3 &gt; No weapon equipped!
+DCY-3 &gt; Can't move.
+&lt;=== END TURN 3 ===&gt;
+&lt;=== BEGIN TURN 4 ===&gt;
+* DCY-3 acquired DASS-5000 - The ultimate in siege weaponry provided by Obviam Enterprises.
+SCT-1 &gt; Shooting my laser canon to 8,6. Bang on! Done 0.5 damage.
+SCT-1 &gt; Speeding to 2,3 on my wheels!
+ASS-2 &gt; Darn! Out of ammo! Reloading!
+ASS-2 &gt; Don't get in my way! Moving slowly to: 0,6.
+DCY-3 &gt; Eat this! Laser beam hit target (9,4) and dealt 1.5 damage.
+DCY-3 &gt; Can't move.
+&lt;=== END TURN 4 ===&gt;
+&lt;=== BEGIN TURN 5 ===&gt;
+SCT-1 &gt; Shooting my laser canon to 1,7. Bang on! Done 0.5 damage.
+SCT-1 &gt; Speeding to 1,9 on my wheels!
+ASS-2 &gt; Eat this! Laser beam hit target (1,4) and dealt 1.5 damage.
+ASS-2 &gt; Don't get in my way! Moving slowly to: 3,6.
+DCY-3 &gt; Darn! Out of ammo! Reloading!
+DCY-3 &gt; Can't move.
+&lt;=== END TURN 5 ===&gt; 
+</code></pre>
+
+<p>Note in turn 4 how <code>DecoyDroid</code> got the new weapon and changed its behaviour (the yellow line). Now you should understand the null object pattern as well.</p>
+
+<p>As it stands now, it is easy to create new weapons, chassis and droids by keeping the code to a minimum. Always favour composition over inheritance in these situations.</p>
+
+<p>You can create a very elaborate droid, with shields, sensors, an array of weapons and also an AI <strong>component</strong> which decides what weapons to use according to the situation. If you have noticed, I used the term &#8220;use&#8221; instead of fire, because a weapon can be a melee one too and not necessarily a ranged weapon.</p>
+
+<p>The downloadable project contains only the strategy pattern implementation. The simple inheritance approach is left out. Play with it and get the grips of this useful pattern as I will use it extensively and it is considered good design. It is a simple Java application, it is not Android enabled.</p>
+
+<p>In the following parts I&rsquo;ll try to add some AI capabilities and how to compose the final droid from images of its components.</p>
+            </div>
+            
+            <div class="post-comments">
+                
+            </div>
+            
+            <div class="push"></div>
+        </div>
+        <footer class="footer text-center">
+<p>Copyright &copy; 2017 obviam.net -
+<span class="credit">
+	Powered by 
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and 
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+    </body>

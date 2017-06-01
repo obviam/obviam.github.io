@@ -1,0 +1,736 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Strategy Pattern on Obviam - Game Development Tutorials and Musings in Software Development</title>
+    <link>https://obviam.github.io/tags/strategy-pattern/index.xml</link>
+    <description>Recent content in Strategy Pattern on Obviam - Game Development Tutorials and Musings in Software Development</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="https://obviam.github.io/tags/strategy-pattern/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Object Composition Strategies - The Strategy Pattern</title>
+      <link>https://obviam.github.io/the-strategy-pattern</link>
+      <pubDate>Mon, 20 Dec 2010 01:04:57 +0000</pubDate>
+      
+      <guid>https://obviam.github.io/the-strategy-pattern</guid>
+      <description>&lt;p&gt;In this part I will try to explain what I understand on good game design elements.&lt;/p&gt;
+
+&lt;p&gt;I will use droids in the examples and I will script a basic fight simulator to see how they behave.&lt;/p&gt;
+
+&lt;h4 id=&#34;the-problem&#34;&gt;The problem:&lt;/h4&gt;
+
+&lt;p&gt;I command a single robot and I want to obliterate my enemies. To face the same type of enemy all over again is boring. I need new challenges and this means new types of enemies. For example in the first level I want only to practice my target. So I need a pretty dumb enemy that does not do much but takes the shots. After I mastered that skill (shooting a helpless droid), I need a bit of a challenge and I want the enemy droid to fight back, but because I am still a beginner I don&amp;rsquo;t want to die quickly so I need weak droids. After I am over with them I want a tougher challenge. I need better and stronger droids. Not just stronger, but different in behaviour as well as it can get boring killing the same type of enemy over and over again.&lt;/p&gt;
+
+&lt;h4 id=&#34;the-obvious-solution&#34;&gt;The obvious solution:&lt;/h4&gt;
+
+&lt;p&gt;Create 3 classes for the 3 types of enemy droids. To keep it simple, each droid has 2 abilities: &lt;em&gt;move&lt;/em&gt; and &lt;em&gt;attack&lt;/em&gt;. It makes sense to create a &lt;code&gt;Droid&lt;/code&gt; interface with these two methods and have each droid implement them.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;They can &lt;strong&gt;move&lt;/strong&gt; and &lt;strong&gt;shoot&lt;/strong&gt;. Well, not all of them but we can provide an empty implementation for the ones that do nothing.&lt;/p&gt;
+
+&lt;h5 id=&#34;the-droid-types&#34;&gt;The droid types:&lt;/h5&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Decoy Droid&lt;/strong&gt; - will have no weapon and can&amp;rsquo;t move.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Scout Droid&lt;/strong&gt; - will have a weak weapon and moves fast.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Assault Droid&lt;/strong&gt; - will have a heavy weapon and moves slowly.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Looking at the 3 types we can implement the following simple class diagram:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://obviam.github.io/images/archive/2010/12/composition.bad_.jpg&#34; alt=&#34;The Droid interface&#34; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Implementing the Droid interface&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The interface has 3 simple methods which the droids need to implement:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;interface&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;Droid&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// display some info of the droid&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// move the droid&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;move&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// attack position&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;shoot&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The 3 classes are as follow:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;DecoyDroid.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;DecoyDroid&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Droid &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;I am a DECOY droid&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+		&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;move&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Can&amp;#39;t move.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;shoot&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Have no weapon.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;ScoutDroid.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;ScoutDroid&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Droid &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; damage &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;I am a scout droid&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;move&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Moving QUICKLY to: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; x &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;,&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; y &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;shoot&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Light Laser Canon targeting: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; x &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;,&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; y
+				&lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;. Damage: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; damage&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;AssaultDroid.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;AssaultDroid&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Droid &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; 	damage &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;2.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;boolean&lt;/span&gt; loaded &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;I am an ASSAULT droid&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;move&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Moving SLOWLY to: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; x &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;,&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; y &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;shoot&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;loaded&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Heavy laser targeting: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; x &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;,&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; y
+					&lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;. Damage: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; damage&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+			loaded &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Reloading...&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+			loaded &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Both &lt;code&gt;ScoutDroid&lt;/code&gt; and &lt;code&gt;AssaultDroid&lt;/code&gt; have the argument &lt;code&gt;damage&lt;/code&gt;. This holds the value of the damage inflicted by them.&lt;/p&gt;
+
+&lt;p&gt;To give the &lt;code&gt;AssaultDroid&lt;/code&gt; a heavy weapon with a slow reload time we added the &lt;code&gt;loaded&lt;/code&gt; variable. This way it takes the assault droid two turns to fire its weapon once.&lt;/p&gt;
+
+&lt;p&gt;I have created a simple simulator for the droids to take turns to move and shoot.&lt;/p&gt;
+
+&lt;p&gt;Run the simulator for this design:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;BadDroidSimulator.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;BadDroidSimulator&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;main&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;String&lt;span style=&#34;color: #666666&#34;&gt;[]&lt;/span&gt; args&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// for generating random numbers&lt;/span&gt;
+		Random rand &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; Random&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		
+		Droid scout &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; ScoutDroid&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		Droid assailant &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; AssaultDroid&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		Droid decoy &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; DecoyDroid&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		
+		scout&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		assailant&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		decoy&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		
+		&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// shoot-out - each droid fires once per turn&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; i &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt; i &lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;=&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;5&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt; i&lt;span style=&#34;color: #666666&#34;&gt;++)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;\n&amp;lt;=== BEGIN TURN &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; i &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; ===&amp;gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+			scout&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;shoot&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// we assume this is an enemy position&lt;/span&gt;
+			scout&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;move&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+			assailant&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;shoot&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+			assailant&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;move&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+			decoy&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;shoot&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+			decoy&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;move&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;&amp;lt;=== END TURN &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; i &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; ===&amp;gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The result (console output) will look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;I am a scout droid
+I am an ASSAULT droid
+I am a DECOY droid 
+&amp;lt;=== BEGIN TURN 1 ===&amp;gt;
+Light Laser Canon targeting: 9,0. Damage: 0.5
+Moving QUICKLY to: 4,6.
+Heavy laser targeting: 6,2. Damage: 2.5
+Moving SLOWLY to: 9,1.
+Have no weapon.
+Can&#39;t move.
+&amp;lt;=== END TURN 1 ===&amp;gt;
+&amp;lt;=== BEGIN TURN 2 ===&amp;gt;
+Light Laser Canon targeting: 3,4. Damage: 0.5
+Moving QUICKLY to: 6,5.
+Reloading&amp;amp;#8230;
+Moving SLOWLY to: 1,6.
+Have no weapon.
+Can&#39;t move.
+&amp;lt;=== END TURN 2 ===&amp;gt;
+&amp;lt;=== BEGIN TURN 3 ===&amp;gt;
+Light Laser Canon targeting: 6,7. Damage: 0.5
+Moving QUICKLY to: 9,7.
+Heavy laser targeting: 7,1. Damage: 2.5
+Moving SLOWLY to: 2,0.
+Have no weapon.
+Can&#39;t move.
+&amp;lt;=== END TURN 3 ===&amp;gt;
+&amp;lt;=== BEGIN TURN 4 ===&amp;gt;
+Light Laser Canon targeting: 3,7. Damage: 0.5
+Moving QUICKLY to: 1,4.
+Reloading&amp;amp;#8230;Moving SLOWLY to: 5,9.
+Have no weapon.
+Can&#39;t move.
+&amp;lt;=== END TURN 4 ===&amp;gt;
+&amp;lt;=== BEGIN TURN 5 ===&amp;gt;
+Light Laser Canon targeting: 0,8. Damage: 0.5
+Moving QUICKLY to: 3,9.
+Heavy laser targeting: 1,2. Damage: 2.5
+Moving SLOWLY to: 3,2.
+Have no weapon.
+Can&#39;t move.
+&amp;lt;=== END TURN 5 ===&amp;gt; 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;####Challenges to extend the design&lt;/p&gt;
+
+&lt;p&gt;The droids take turns to move and shoot. This is all good, but:
+* What if you want to create a hybrid droid? A droid that moves as fast as the scout but with a heavy weapon?&lt;/p&gt;
+
+&lt;p&gt;You will have to create a new class and copy paste the respective methods from the Scout and Assault droid, right?
+* Also imagine that the shooting mechanism is not that simple and it needs collision detection and so on. For each droid the same redundant code needs to be rewritten.
+* What if the fire power could be enhanced with power ups?
+* What if the droid gains self-conscientiousness and finds a weapon to use it instead of the current one?&lt;/p&gt;
+
+&lt;p&gt;I am sure you have plenty ideas on how to enhance the gameplay and extend the world but the most obvious solution (described above) seems ill-suited for this. It requires new droid classes to be created and each droid type will implement its methods separately. Many of these methods are identical. The current design doesn&amp;rsquo;t allow you to change the droid&amp;rsquo;s internals at runtime without significant effort.&lt;/p&gt;
+
+&lt;p&gt;Here is one proposed solution: &lt;strong&gt;[Composition](&amp;ldquo;&lt;a href=&#34;http://en.wikipedia.org/wiki/Object_composition&amp;quot;&#34;&gt;http://en.wikipedia.org/wiki/Object_composition&amp;quot;&lt;/a&gt;)&lt;/strong&gt; and the &lt;strong&gt;&lt;a href=&#34;http://en.wikipedia.org/wiki/Strategy_pattern&#34;&gt;Strategy Pattern&lt;/a&gt;&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;####Designing a Droid (properly)&lt;/p&gt;
+
+&lt;p&gt;A very simple droid consists of a &lt;strong&gt;weapon&lt;/strong&gt; put on a &lt;strong&gt;chassis&lt;/strong&gt;. The first design consisted of a &lt;strong&gt;&amp;#8220;is a&amp;#8221;&lt;/strong&gt; type relationship. A &lt;code&gt;ScoutDroid&lt;/code&gt; &lt;strong&gt;is a&lt;/strong&gt; generic &lt;code&gt;Droid&lt;/code&gt; with some peculiarities.&lt;/p&gt;
+
+&lt;p&gt;Composition is based on &lt;strong&gt;&amp;#8220;has a&amp;#8221;&lt;/strong&gt; relationships.&lt;/p&gt;
+
+&lt;p&gt;A Droid &lt;strong&gt;has a&lt;/strong&gt; &lt;strong&gt;Chassis&lt;/strong&gt;. A Droid &lt;strong&gt;has a&lt;/strong&gt; &lt;strong&gt;Weapon&lt;/strong&gt;. What type of components a droid has, determines its type.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s decompose the Scout Droid for example.&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;Scout Droid&lt;/strong&gt; &lt;strong&gt;is a&lt;/strong&gt; &lt;strong&gt;Droid&lt;/strong&gt; which &lt;strong&gt;has a&lt;/strong&gt; &lt;strong&gt;Light Laser Canon&lt;/strong&gt; &lt;strong&gt;has a&lt;/strong&gt; set of &lt;strong&gt;Wheels&lt;/strong&gt; to move. We want to make the scout move quickly with a light weapon.&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;Assault Droid&lt;/strong&gt; on the other hand is a Droid too but it has a &lt;strong&gt;Heavy Laser Canon&lt;/strong&gt; and it runs on &lt;strong&gt;Tracks&lt;/strong&gt;. This makes it extremely powerful but a bit slow.&lt;/p&gt;
+
+&lt;p&gt;Think from a factory perspective. How does a car production line work? You get the chassis with a specific place for the engine, wheels, drive-shaft, gear-box and so on.&lt;/p&gt;
+
+&lt;p&gt;All these components are produced separately. The teams that produce them have no idea of the other parts. They must fulfil one criteria: the gearbox must fit in perfectly in its place and connected up with the engine.. Different makes have different ways of doing this. The connector in this instance is the &lt;strong&gt;interface&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;The engine has a similar story. If it hooks up nicely with the wheels and gearbox then it can be fitted. Its internal design, capacity, power, fuel consumption can be completely different. The engine is one of the car&amp;rsquo;s components.&lt;/p&gt;
+
+&lt;p&gt;So is our droid. But to keep it simple we have only 2 components. We need one generic droid that has all the wirings built so its components will be triggered by the droid through those interfaces. For example a droid needs to only pull the trigger of the weapon and doesn&amp;rsquo;t care what type of weapon it is as long as it has a trigger. The droid needs to understand the &lt;strong&gt;pullTrigger&lt;/strong&gt; method and to do this it needs to be implemented, in order for us to give weapons to the droid to use.&lt;/p&gt;
+
+&lt;p&gt;The same thing with the changing of location. It needs to trigger the movement. The wheels or track or anti-gravity propulsion will take the droid there. The droid only needs to set the coordinates.&lt;/p&gt;
+
+&lt;p&gt;To fulfil this we need a class with implemented methods instead of an interface.&lt;/p&gt;
+
+&lt;p&gt;We create the abstract &lt;code&gt;Droid&lt;/code&gt; class. We make it abstract because we actually implement the methods that trigger the weapon, and action the moving mechanism but we don&amp;rsquo;t have concrete weapons and movement mechanisms attached to the droid. The assembly of a concrete droid will be delegated to the type constructor along with the description method.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;abstract&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;Droid&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;protected&lt;/span&gt; Weapon 	weapon&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;		&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// the weapon which will be used in fights&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;protected&lt;/span&gt; Chassis	chassis&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// the chassis on which the droid is placed&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;moveToPosition&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;print&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;id &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; &amp;gt; &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		chassis&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;moveTo&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 *  Engages the position on the screen whether it is occupied by&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 *  an enemy or not. Each strategy should decide how to do it. &lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 */&lt;/span&gt; 
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;attackPosition&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;print&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;id &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; &amp;gt; &amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		weapon&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;useWeapon&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; Vector2f&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 * Displays some info on the droid&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 */&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;abstract&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If you examine the class you will see that the &lt;code&gt;Droid&lt;/code&gt; has 3 methods from which 2 are implemented. It also has two &lt;strong&gt;components&lt;/strong&gt;: &lt;code&gt;Weapon&lt;/code&gt; and &lt;code&gt;Chassis&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The components are interfaces so the droid does not know what it is doing when triggering the actions on them. It is all delegated to the implementation.&lt;/p&gt;
+
+&lt;p&gt;The interfaces are as follows:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;Weapon.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;interface&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;Weapon&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 * The trigger to use the weapon.&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 * @param target - where on the map is the target&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 */&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;useWeapon&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;Vector2f target&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 * Returns the description of the weapon&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 */&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #06287e&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;Chassis.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;interface&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;Chassis&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 * Delegates the movement to the supporting chassis and&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 * tries to move the unit to x,y&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 */&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;moveTo&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 * Returns the description of the chassis&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 */&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #06287e&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;We will enhance our base &lt;code&gt;Droid&lt;/code&gt; class. We will add setter and getter methods for both &lt;code&gt;Weapon&lt;/code&gt; and &lt;code&gt;Chassis&lt;/code&gt;. This will allow us to change the droid&amp;rsquo;s behaviour at runtime. This is what the &lt;strong&gt;strategy pattern&lt;/strong&gt; is all about. A Droid has behaviours: it can use a &lt;strong&gt;weapon&lt;/strong&gt; and it can &lt;strong&gt;move&lt;/strong&gt;. These two strategies (behaviours) need to be implemented.&lt;/p&gt;
+
+&lt;p&gt;We also add an &lt;code&gt;id&lt;/code&gt; which will be unique in our game for each droid instance. I use a very simple id generation strategy. I increment the &lt;code&gt;nextId&lt;/code&gt; static field and append it to the concrete droid type prefix in the constructor for each type.&lt;/p&gt;
+
+&lt;p&gt;Here is the new &lt;code&gt;Droid&lt;/code&gt; class:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;abstract&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;Droid&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;protected&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; nextId	&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// the next available ID&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;protected&lt;/span&gt; String 	id&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;			&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// unique id&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;protected&lt;/span&gt; Weapon 	weapon&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;		&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// the weapon which will be used in fights&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;protected&lt;/span&gt; Chassis	chassis&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// the chassis on which the droid is placed&lt;/span&gt;
+
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// the unique ID of the droid in the game&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #06287e&#34;&gt;getId&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;return&lt;/span&gt; id&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; Weapon &lt;span style=&#34;color: #06287e&#34;&gt;getWeapon&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;return&lt;/span&gt; weapon&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;setWeapon&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;Weapon weapon&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;weapon&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; weapon&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; Chassis &lt;span style=&#34;color: #06287e&#34;&gt;getChassis&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;return&lt;/span&gt; chassis&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;setChassis&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;Chassis chassis&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;chassis&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; chassis&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;moveToPosition&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;print&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;id &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; &amp;gt; &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		chassis&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;moveTo&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 *  Engages the position on the screen whether it is occupied by&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 *  an enemy or not. Each strategy should decide how to do it. &lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 */&lt;/span&gt; 
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;attackPosition&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;print&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;id &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; &amp;gt; &amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		weapon&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;useWeapon&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; Vector2f&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 * Displays some info on the droid&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;	 */&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;abstract&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;####Let&amp;rsquo;s build some weapons&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;NoWeapon.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; * This is a null object. A null object is a dummy that does nothing and it &lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; * is a mere place-holder and eliminates the need to check for null.&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; * @author impaler&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; *&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; */&lt;/span&gt;
+&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;NoWeapon&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Weapon &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;useWeapon&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;Vector2f target&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// We are doing nothing&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;No weapon equipped!&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #06287e&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Nothing&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is the null object. The class description should give you an idea what it is.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;LightLaserCanon.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; * This is a light laser cannon whit a quick reload time and high accuracy&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; * &lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; * @author impaler&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; * &lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; */&lt;/span&gt;
+&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;LightLaserCanon&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Weapon &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; damage &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt; &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// the damage inflicted&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;useWeapon&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;Vector2f target&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Shooting my laser canon to &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt;target&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getX&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;,&amp;quot;&lt;/span&gt;
+				&lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt;target&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getY&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;. Bang on! Done &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; damage &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; damage.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #06287e&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;First generation laser canon. Street use only!&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;HeavyLaserCanon.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; * This is a heavy assault laser cannon with high accuracy but slow reload time.&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; * @author impaler&lt;/span&gt;
+&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt; */&lt;/span&gt;
+&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;HeavyLaserCanon&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Weapon &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;boolean&lt;/span&gt; loaded 	&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// after fire needs to be reloaded&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; 	damage 	&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// the damage is considerable&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;useWeapon&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;Vector2f target&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;loaded&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+			&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// we fire the canon&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Eat this! Laser beam hit target (&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt;target&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getX&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;,&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt;target&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getY&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;) and dealt &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; damage &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; damage.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+			&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// next time needs reloading&lt;/span&gt;
+			loaded &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Darn! Out of ammo! Reloading...&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+			loaded &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #06287e&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;DASS-5000 - The ultimate in siege weaponry provided by Obviam Enterprises.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You might notice the &lt;code&gt;Vector2f&lt;/code&gt; class. This is a very basic 2D vector class which currently holds the x and y coordinates. Nothing more. You can find it in the downloaded source.&lt;/p&gt;
+
+&lt;p&gt;####Let&amp;rsquo;s build some chassis&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;getDescription()&lt;/code&gt; method says what the chassis is like.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;NoChassis.java&lt;/code&gt; - null object (see weapons)&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;NoChassis&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Chassis &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;moveTo&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;It&amp;#39;s just a frame. Can&amp;#39;t move.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #06287e&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;It&amp;#39;s just a frame.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;SteelStand.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;SteelStand&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Chassis &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;moveTo&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Can&amp;#39;t move.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #06287e&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Unmovable reinforced steel stand ideal for turrets and defensive units.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;Wheels.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;Wheels&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Chassis &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;moveTo&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Speeding to &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; x &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;,&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; y &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; on my wheels!&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #06287e&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;4 wheel drive, very fast on flat terrain but struggling through obstacles.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;Track.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;Track&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Chassis &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;moveTo&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; x&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; y&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Don&amp;#39;t get in my way! Moving slowly to: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; x &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;,&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; y &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #06287e&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Slow moving tracks but able to go through many obstacles.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;####Now we can assemble our droids&lt;/p&gt;
+
+&lt;p&gt;First let&amp;rsquo;s create a &lt;code&gt;DecoyDroid&lt;/code&gt;. This droid will have no weapon and will be placed on a steel stand. It&amp;rsquo;s for our target practice, remember?&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;DecoyDroid.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;DecoyDroid&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;extends&lt;/span&gt; Droid &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;DecoyDroid&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		id &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;DCY-&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(++&lt;/span&gt;Droid&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextId&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt; 
+		weapon &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; NoWeapon&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		chassis &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; SteelStand&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;+--------------------------------------------------------------------------------------------+&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;| I am a DECOY droid.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;|\tID: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; id&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;|\tWeapon: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; weapon&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;());&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;|\tChassis: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; chassis&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;());&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;+--------------------------------------------------------------------------------------------+&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Examine the default constructor. It creates an &lt;code&gt;id&lt;/code&gt; and assigns an instance of &lt;code&gt;NoWeapon&lt;/code&gt; and &lt;code&gt;SteelStand&lt;/code&gt; to the droid.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;display()&lt;/code&gt; method is more elaborate than before but just to describe the droid better. It makes use of the components&amp;rsquo; descriptions too.&lt;/p&gt;
+
+&lt;p&gt;If you instantiate a &lt;code&gt;DecoyDroid&lt;/code&gt; and call its display method you will get a nice description of it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;+--------------------------------------------------------------------------------------------+
+| I am a DECOY droid. 
+| ID: DCY-3
+| Weapon: Nothing 
+| Chassis: Unmovable reinforced steel stand ideal for turrets and defensive units. 
++--------------------------------------------------------------------------------------------+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s build the rest of the types:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;ScoutDroid.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;ScoutDroid&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;extends&lt;/span&gt; Droid &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;ScoutDroid&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		id &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;SCT-&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(++&lt;/span&gt;Droid&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextId&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt; 
+		weapon &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; LightLaserCanon&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		chassis &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; Wheels&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;+--------------------------------------------------------------------------------------------+&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;| I am a SCOUT droid.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;|\tID: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; id&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;|\tWeapon: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; weapon&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;());&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;|\tChassis: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; chassis&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;());&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;+--------------------------------------------------------------------------------------------+&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;AssaultDroid.java&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;AssaultDroid&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;extends&lt;/span&gt; Droid &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;AssaultDroid&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		id &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;ASS-&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(++&lt;/span&gt;Droid&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextId&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt; 
+		weapon &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; HeavyLaserCanon&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		chassis &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; Track&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	
+	&lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;+--------------------------------------------------------------------------------------------+&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;| I am an ASSAULT droid.&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;|\tID: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; id&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;|\tWeapon: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; weapon&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;());&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;|\tChassis: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; chassis&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;());&lt;/span&gt;
+		System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;+--------------------------------------------------------------------------------------------+&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You will notice that the only things needed to be implemented are the constructor - which adds the chassis and weapon - and the &lt;code&gt;display()&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;p&gt;The following diagram shows the new architecture:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://obviam.github.io/images/archive/2010/12/Droids.comp_.jpg&#34; alt=&#34;Strategy Pattern&#34; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Strategy Pattern&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a test script for it. We&amp;rsquo;ll simulate 5 turns in which each droid will use its weapon and move to a random location.&lt;/p&gt;
+
+&lt;p&gt;Check the behaviour of each weapon and you will notice that the heavy laser will fire once every 2 turns.&lt;/p&gt;
+
+&lt;p&gt;To make it interesting, in turn 4 we give a &lt;code&gt;HeavyLaserCanon&lt;/code&gt; to &lt;code&gt;DecoyDroid&lt;/code&gt;. Look at how it changes the droid&amp;rsquo;s behaviour and it starts firing. This is a hybrid droid created on the fly at runtime.&lt;/p&gt;
+
+&lt;p&gt;The simulator code (&lt;code&gt;DroidSimulator.java&lt;/code&gt;):&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;DroidSimulator&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+	&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;main&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;String&lt;span style=&#34;color: #666666&#34;&gt;[]&lt;/span&gt; args&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// for generating random numbers&lt;/span&gt;
+		Random rand &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; Random&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		
+		Droid scout &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; ScoutDroid&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		Droid assailant &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; AssaultDroid&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		Droid decoy &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; DecoyDroid&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		
+		scout&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		assailant&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		decoy&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;display&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+		
+		&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// shoot-out - each droid fires once per turn&lt;/span&gt;
+		&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; i &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt; i &lt;span style=&#34;color: #666666&#34;&gt;&amp;lt;=&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;5&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt; i&lt;span style=&#34;color: #666666&#34;&gt;++)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;\n&amp;lt;=== BEGIN TURN &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; i &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; ===&amp;gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+			&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// in turn 3 decoy droid is given an assault canon&lt;/span&gt;
+			&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;i &lt;span style=&#34;color: #666666&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;4&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+				decoy&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;setWeapon&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; HeavyLaserCanon&lt;span style=&#34;color: #666666&#34;&gt;());&lt;/span&gt;
+				System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;* &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; decoy&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getId&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; acquired &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; decoy&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getWeapon&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;getDescription&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;\n&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+			&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+			scout&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;attackPosition&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;	&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// we assume this is an enemy position&lt;/span&gt;
+			scout&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;moveToPosition&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+			assailant&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;attackPosition&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+			assailant&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;moveToPosition&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+			decoy&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;attackPosition&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+			decoy&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;moveToPosition&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;),&lt;/span&gt; rand&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nextInt&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;));&lt;/span&gt;
+			System&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;&amp;lt;=== END TURN &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; i &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; ===&amp;gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+		&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+	&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The output:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;+--------------------------------------------------------------------------------------------+
+| I am a SCOUT droid.
+| ID: SCT-1
+| Weapon: First generation laser canon. Street use only!
+| Chassis: 4 wheel drive, very fast on flat terrain but struggling through obstacles.
++--------------------------------------------------------------------------------------------+
++--------------------------------------------------------------------------------------------+
+| I am an ASSAULT droid.
+| ID: ASS-2
+| Weapon: DASS-5000 - The ultimate in siege weaponry provided by Obviam Enterprises.
+| Chassis: Slow moving tracks but able to go through many obstacles.
++--------------------------------------------------------------------------------------------+
++--------------------------------------------------------------------------------------------+
+| I am a DECOY droid.
+| ID: DCY-3
+| Weapon: Nothing
+| Chassis: Unmovable reinforced steel stand ideal for turrets and defensive units.
++--------------------------------------------------------------------------------------------+
+&amp;lt;=== BEGIN TURN 1 ===&amp;gt;
+SCT-1 &amp;gt; Shooting my laser canon to 0,3. Bang on! Done 0.5 damage.
+SCT-1 &amp;gt; Speeding to 0,2 on my wheels!
+ASS-2 &amp;gt; Eat this! Laser beam hit target (3,4) and dealt 1.5 damage.
+ASS-2 &amp;gt; Don&#39;t get in my way! Moving slowly to: 3,8.
+DCY-3 &amp;gt; No weapon equipped!
+DCY-3 &amp;gt; Can&#39;t move.
+&amp;lt;=== END TURN 1 ===&amp;gt;
+&amp;lt;=== BEGIN TURN 2 ===&amp;gt;
+SCT-1 &amp;gt; Shooting my laser canon to 4,0. Bang on! Done 0.5 damage.
+SCT-1 &amp;gt; Speeding to 5,0 on my wheels!
+ASS-2 &amp;gt; Darn! Out of ammo! Reloading!
+ASS-2 &amp;gt; Don&#39;t get in my way! Moving slowly to: 1,6.
+DCY-3 &amp;gt; No weapon equipped!
+DCY-3 &amp;gt; Can&#39;t move.
+&amp;lt;=== END TURN 2 ===&amp;gt;
+&amp;lt;=== BEGIN TURN 3 ===&amp;gt;
+SCT-1 &amp;gt; Shooting my laser canon to 3,0. Bang on! Done 0.5 damage.
+SCT-1 &amp;gt; Speeding to 0,6 on my wheels!
+ASS-2 &amp;gt; Eat this! Laser beam hit target (9,1) and dealt 1.5 damage.
+ASS-2 &amp;gt; Don&#39;t get in my way! Moving slowly to: 8,0.
+DCY-3 &amp;gt; No weapon equipped!
+DCY-3 &amp;gt; Can&#39;t move.
+&amp;lt;=== END TURN 3 ===&amp;gt;
+&amp;lt;=== BEGIN TURN 4 ===&amp;gt;
+* DCY-3 acquired DASS-5000 - The ultimate in siege weaponry provided by Obviam Enterprises.
+SCT-1 &amp;gt; Shooting my laser canon to 8,6. Bang on! Done 0.5 damage.
+SCT-1 &amp;gt; Speeding to 2,3 on my wheels!
+ASS-2 &amp;gt; Darn! Out of ammo! Reloading!
+ASS-2 &amp;gt; Don&#39;t get in my way! Moving slowly to: 0,6.
+DCY-3 &amp;gt; Eat this! Laser beam hit target (9,4) and dealt 1.5 damage.
+DCY-3 &amp;gt; Can&#39;t move.
+&amp;lt;=== END TURN 4 ===&amp;gt;
+&amp;lt;=== BEGIN TURN 5 ===&amp;gt;
+SCT-1 &amp;gt; Shooting my laser canon to 1,7. Bang on! Done 0.5 damage.
+SCT-1 &amp;gt; Speeding to 1,9 on my wheels!
+ASS-2 &amp;gt; Eat this! Laser beam hit target (1,4) and dealt 1.5 damage.
+ASS-2 &amp;gt; Don&#39;t get in my way! Moving slowly to: 3,6.
+DCY-3 &amp;gt; Darn! Out of ammo! Reloading!
+DCY-3 &amp;gt; Can&#39;t move.
+&amp;lt;=== END TURN 5 ===&amp;gt; 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note in turn 4 how &lt;code&gt;DecoyDroid&lt;/code&gt; got the new weapon and changed its behaviour (the yellow line). Now you should understand the null object pattern as well.&lt;/p&gt;
+
+&lt;p&gt;As it stands now, it is easy to create new weapons, chassis and droids by keeping the code to a minimum. Always favour composition over inheritance in these situations.&lt;/p&gt;
+
+&lt;p&gt;You can create a very elaborate droid, with shields, sensors, an array of weapons and also an AI &lt;strong&gt;component&lt;/strong&gt; which decides what weapons to use according to the situation. If you have noticed, I used the term &amp;#8220;use&amp;#8221; instead of fire, because a weapon can be a melee one too and not necessarily a ranged weapon.&lt;/p&gt;
+
+&lt;p&gt;The downloadable project contains only the strategy pattern implementation. The simple inheritance approach is left out. Play with it and get the grips of this useful pattern as I will use it extensively and it is considered good design. It is a simple Java application, it is not Android enabled.&lt;/p&gt;
+
+&lt;p&gt;In the following parts I&amp;rsquo;ll try to add some AI capabilities and how to compose the final droid from images of its components.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
