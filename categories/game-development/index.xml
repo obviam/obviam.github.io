@@ -968,7 +968,9 @@ Can&#39;t move.
 &amp;lt;=== END TURN 5 ===&amp;gt; 
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;####Challenges to extend the design&lt;/p&gt;
+&lt;p&gt;&lt;br/&gt;&lt;/p&gt;
+
+&lt;h4 id=&#34;challenges-to-extend-the-design&#34;&gt;Challenges to extend the design&lt;/h4&gt;
 
 &lt;p&gt;The droids take turns to move and shoot. This is all good, but:
 * What if you want to create a hybrid droid? A droid that moves as fast as the scout but with a heavy weapon?&lt;/p&gt;
@@ -982,7 +984,9 @@ Can&#39;t move.
 
 &lt;p&gt;Here is one proposed solution: &lt;strong&gt;&lt;a href=&#34;http://en.wikipedia.org/wiki/Object_composition&#34;&gt;Composition&lt;/a&gt;&lt;/strong&gt; and the &lt;strong&gt;&lt;a href=&#34;http://en.wikipedia.org/wiki/Strategy_pattern&#34;&gt;Strategy Pattern&lt;/a&gt;&lt;/strong&gt;.&lt;/p&gt;
 
-&lt;p&gt;####Designing a Droid (properly)&lt;/p&gt;
+&lt;p&gt;&lt;br/&gt;&lt;/p&gt;
+
+&lt;h4 id=&#34;designing-a-droid-properly&#34;&gt;Designing a Droid (properly)&lt;/h4&gt;
 
 &lt;p&gt;A very simple droid consists of a &lt;strong&gt;weapon&lt;/strong&gt; put on a &lt;strong&gt;chassis&lt;/strong&gt;. The first design consisted of a &lt;strong&gt;&amp;#8220;is a&amp;#8221;&lt;/strong&gt; type relationship. A &lt;code&gt;ScoutDroid&lt;/code&gt; &lt;strong&gt;is a&lt;/strong&gt; generic &lt;code&gt;Droid&lt;/code&gt; with some peculiarities.&lt;/p&gt;
 
@@ -1002,7 +1006,7 @@ Can&#39;t move.
 
 &lt;p&gt;The engine has a similar story. If it hooks up nicely with the wheels and gearbox then it can be fitted. Its internal design, capacity, power, fuel consumption can be completely different. The engine is one of the car&amp;rsquo;s components.&lt;/p&gt;
 
-&lt;p&gt;So is our droid. But to keep it simple we have only 2 components. We need one generic droid that has all the wirings built so its components will be triggered by the droid through those interfaces. For example a droid needs to only pull the trigger of the weapon and doesn&amp;rsquo;t care what type of weapon it is as long as it has a trigger. The droid needs to understand the &lt;strong&gt;pullTrigger&lt;/strong&gt; method and to do this it needs to be implemented, in order for us to give weapons to the droid to use.&lt;/p&gt;
+&lt;p&gt;So is our droid. But to keep it simple we have only 2 components. We need one generic droid that has all the wirings built so its components will be triggered by the droid through those interfaces. For example a droid needs to only pull the trigger of the weapon and doesn&amp;rsquo;t care what type of weapon it is as long as it has a trigger. The droid needs to understand the &lt;code&gt;pullTrigger&lt;/code&gt; method and to do this it needs to be implemented, in order for us to give weapons to the droid to use.&lt;/p&gt;
 
 &lt;p&gt;The same thing with the changing of location. It needs to trigger the movement. The wheels or track or anti-gravity propulsion will take the droid there. The droid only needs to set the coordinates.&lt;/p&gt;
 
@@ -1270,7 +1274,7 @@ Can&#39;t move.
 &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;####Now we can assemble our droids&lt;/p&gt;
+&lt;h4 id=&#34;now-we-can-assemble-our-droids&#34;&gt;Now we can assemble our droids&lt;/h4&gt;
 
 &lt;p&gt;First let&amp;rsquo;s create a &lt;code&gt;DecoyDroid&lt;/code&gt;. This droid will have no weapon and will be placed on a steel stand. It&amp;rsquo;s for our target practice, remember?&lt;/p&gt;
 
