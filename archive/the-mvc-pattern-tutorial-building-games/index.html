@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> Building Games Using the MVC Pattern - Tutorial and Introduction &middot; Obviam - Game Development Tutorials and Musings in Software Development </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.13" />
+
+
+<script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://obviam.github.io/css/nix.css">
+
+ 
+<link href="https://fonts.googleapis.com/css?family=Inconsolata|Open+Sans|Roboto|Montserrat|Concert+One|Source+Code+Pro:400,700" rel="stylesheet">
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-17403436-1', 'auto');
+	  ga('send', 'pageview');
+
+</script>
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" id="green-terminal" href=https://obviam.github.io/>impaler@obviam.net ~ $</a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href="https://obviam.github.io/">/home/impaler</a>
+				</li>
+				
+				
+				<li >
+					<a href="/blog-tmp">~/blog</a>
+				</li>
+				
+				
+				<li >
+					<a href="/plan">~/.plan</a>
+				</li>
+				
+				
+				<li >
+					<a href="/archive">~/archive</a>
+				</li>
+				
+				
+				<li >
+					<a href="/about">~/about</a>
+				</li>
+				
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="container wrapper">
+            <h1><a href="https://obviam.github.io/archive/the-mvc-pattern-tutorial-building-games">Building Games Using the MVC Pattern - Tutorial and Introduction</a></h1>
+            <span class="post-date">Feb 5, 2012 </span>
+            <div class="post-content">
+                <p>One useful architecture pattern in game development is the MVC (model-view-controller) pattern.</p>
+
+<p>It helps separate the input logic, the game logic and the UI (rendering). The usefulness is quickly noticeable in the early stages of any game development project because it allows to change things quickly without too much rework of code in all layers of the application.</p>
+
+<p></p>
+
+<p>The following diagram is the simplest logical representation of the model view controller concept.</p>
+
+<p><img src="/images/archive/2012/02/mvc1.png" alt="Model-View-Controller pattern" /></p>
+
+<h3 id="example-usage">Example Usage</h3>
+
+<p>In an example game where the player controls a robot the following can happen:</p>
+
+<ul>
+<li><strong>1</strong> - User clicks/taps somewhere on the screen.</li>
+<li><strong>2</strong> - The <strong>controller</strong> handles the click/tap and converts the event into an appropriate action. For example if the terrain is occupied by an enemy, an attack action is created, if it is empty terrain, then a move action is created and finally if the place where the user tapped is occupied by an obstacle, do nothing.</li>
+<li><strong>3</strong> - The <strong>controller</strong> updates the <strong>robot</strong>&rsquo;s (<strong>model</strong>&rsquo;s) state accordingly. If the move action was created, then it changes the position, if the attack, then it fires.</li>
+<li><strong>4</strong> - The <strong>renderer</strong> (<strong>view</strong>) gets notified about the state changes and renders the world&rsquo;s current state.</li>
+</ul>
+
+<p>What this all means is, that the models (robots) don&rsquo;t know anything about how to draw themselves, or how to change their state (position, hit points). They are dumb entities. In Java they are also called POJOs (plain old java objects).</p>
+
+<p>The controller is in charge of changing the models&rsquo; state and notify the renderer.</p>
+
+<p>The renderer has to have a reference to the models (robots and any other entities) and their state, in order to draw them.</p>
+
+<p>We know from the typical <a href="/archive/game-architecture/">game architecture</a> that the <a href="/archive/a-very-basic-the-game-loop-for-android/">main loop</a> acts as a super controller, which updates the states and then renders the objects onto the screen many times a second. We can put all the update and rendering into the main loop along with the robots but that would be messy.</p>
+
+<p>Let&rsquo;s identify the different aspects (concerns) of our games.</p>
+
+<h4 id="the-models">The models</h4>
+
+<ul>
+<li>The droid controlled by the player</li>
+<li>An arena where the droid can move</li>
+<li>Some obstacles</li>
+<li>Some enemies to shoot at</li>
+</ul>
+
+<h4 id="the-controllers">The controllers</h4>
+
+<ul>
+<li>The main loop and the input handler</li>
+<li>Controller to process player input</li>
+<li>Controller to perform actions on the player&rsquo;s robot (move, attack)</li>
+</ul>
+
+<h4 id="the-views">The views</h4>
+
+<ul>
+<li>The world renderer - to render the objects onto the screen</li>
+</ul>
+
+<h4 id="creating-the-project">Creating the Project</h4>
+
+<p>For simplicity I have chosen the applet this time and will try to keep it very brief. The project has the following structure:</p>
+
+<p><img src="/images/archive/2012/02/obviam-mvc-structure.png" alt="MVC - Project structure" /></p>
+
+<p>The file <code>Droids.java</code> is the applet and contains the main loop.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.applet.Applet</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.Color</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.Event</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.Graphics</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.image.BufferedImage</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Droids</span> <span style="color: #007020; font-weight: bold">extends</span> Applet <span style="color: #007020; font-weight: bold">implements</span> Runnable <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #007020; font-weight: bold">static</span> <span style="color: #007020; font-weight: bold">final</span> <span style="color: #902000">long</span> serialVersionUID <span style="color: #666666">=</span> <span style="color: #666666">-</span><span style="color: #40a070">2472397668493332423L</span><span style="color: #666666">;</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">start</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">new</span> Thread<span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">).</span><span style="color: #4070a0">start</span><span style="color: #666666">();</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">run</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        
+        setSize<span style="color: #666666">(</span><span style="color: #40a070">480</span><span style="color: #666666">,</span> <span style="color: #40a070">320</span><span style="color: #666666">);</span> <span style="color: #60a0b0; font-style: italic">// For AppletViewer, remove later.</span>
+
+        <span style="color: #60a0b0; font-style: italic">// Set up the graphics stuff, double-buffering.</span>
+        BufferedImage screen <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> BufferedImage<span style="color: #666666">(</span><span style="color: #40a070">480</span><span style="color: #666666">,</span> <span style="color: #40a070">320</span><span style="color: #666666">,</span> BufferedImage<span style="color: #666666">.</span><span style="color: #4070a0">TYPE_INT_RGB</span><span style="color: #666666">);</span>
+        Graphics g <span style="color: #666666">=</span> screen<span style="color: #666666">.</span><span style="color: #4070a0">getGraphics</span><span style="color: #666666">();</span>
+        Graphics appletGraphics <span style="color: #666666">=</span> getGraphics<span style="color: #666666">();</span>
+
+        <span style="color: #902000">long</span> delta <span style="color: #666666">=</span> <span style="color: #40a070">0</span>l<span style="color: #666666">;</span>
+        
+        <span style="color: #60a0b0; font-style: italic">// Game loop.</span>
+        <span style="color: #007020; font-weight: bold">while</span> <span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">true</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+            <span style="color: #902000">long</span> lastTime <span style="color: #666666">=</span> System<span style="color: #666666">.</span><span style="color: #4070a0">nanoTime</span><span style="color: #666666">();</span>
+
+            g<span style="color: #666666">.</span><span style="color: #4070a0">setColor</span><span style="color: #666666">(</span>Color<span style="color: #666666">.</span><span style="color: #4070a0">black</span><span style="color: #666666">);</span>
+            g<span style="color: #666666">.</span><span style="color: #4070a0">fillRect</span><span style="color: #666666">(</span><span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">480</span><span style="color: #666666">,</span> <span style="color: #40a070">320</span><span style="color: #666666">);</span>
+
+            <span style="color: #60a0b0; font-style: italic">// Draw the entire results on the screen.</span>
+            appletGraphics<span style="color: #666666">.</span><span style="color: #4070a0">drawImage</span><span style="color: #666666">(</span>screen<span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #007020; font-weight: bold">null</span><span style="color: #666666">);</span>
+
+            <span style="color: #60a0b0; font-style: italic">// Lock the frame rate</span>
+            delta <span style="color: #666666">=</span> System<span style="color: #666666">.</span><span style="color: #4070a0">nanoTime</span><span style="color: #666666">()</span> <span style="color: #666666">-</span> lastTime<span style="color: #666666">;</span>
+            <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>delta <span style="color: #666666">&lt;</span> <span style="color: #40a070">20000000L</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+                <span style="color: #007020; font-weight: bold">try</span> <span style="color: #666666">{</span>
+                    Thread<span style="color: #666666">.</span><span style="color: #4070a0">sleep</span><span style="color: #666666">((</span><span style="color: #40a070">20000000L</span> <span style="color: #666666">-</span> delta<span style="color: #666666">)</span> <span style="color: #666666">/</span> <span style="color: #40a070">1000000L</span><span style="color: #666666">);</span>
+                <span style="color: #666666">}</span> <span style="color: #007020; font-weight: bold">catch</span> <span style="color: #666666">(</span>Exception e<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+                    <span style="color: #60a0b0; font-style: italic">// It&#39;s an interrupted exception, and nobody cares</span>
+                <span style="color: #666666">}</span>
+            <span style="color: #666666">}</span>
+            <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(!</span>isActive<span style="color: #666666">())</span> <span style="color: #666666">{</span>
+                <span style="color: #007020; font-weight: bold">return</span><span style="color: #666666">;</span>
+            <span style="color: #666666">}</span>
+        <span style="color: #666666">}</span>
+    <span style="color: #666666">}</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">handleEvent</span><span style="color: #666666">(</span>Event e<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">false</span><span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>Running the above code as an applet does nothing more than setting up the main loop and painting the screen black.</p>
+
+<p>There are 3 packages in the structure and the respective components will go there.</p>
+
+<p><code>net.obviam.droids.model</code> will contain all the models</p>
+
+<p><code>net.obviam.droids.view</code> will contain all the renderers</p>
+
+<p><code>net.obviam.droids.controller</code> will contain all the controllers</p>
+
+<p><br/></p>
+
+<h4 id="creating-the-models">Creating the models</h4>
+
+<p><br/></p>
+
+<h5 id="the-droid">The Droid</h5>
+
+<p><code>Droid.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Droid</span> <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> x<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> y<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> speed <span style="color: #666666">=</span> <span style="color: #40a070">2f</span><span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> rotation <span style="color: #666666">=</span> <span style="color: #40a070">0f</span><span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> damage <span style="color: #666666">=</span> <span style="color: #40a070">2f</span><span style="color: #666666">;</span>
+    
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">float</span> <span style="color: #06287e">getX</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> x<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">setX</span><span style="color: #666666">(</span><span style="color: #902000">float</span> x<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">x</span> <span style="color: #666666">=</span> x<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">float</span> <span style="color: #06287e">getY</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> y<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">setY</span><span style="color: #666666">(</span><span style="color: #902000">float</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">y</span> <span style="color: #666666">=</span> y<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">float</span> <span style="color: #06287e">getSpeed</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> speed<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">setSpeed</span><span style="color: #666666">(</span><span style="color: #902000">float</span> speed<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">speed</span> <span style="color: #666666">=</span> speed<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">float</span> <span style="color: #06287e">getRotation</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> rotation<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">setRotation</span><span style="color: #666666">(</span><span style="color: #902000">float</span> rotation<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">rotation</span> <span style="color: #666666">=</span> rotation<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">float</span> <span style="color: #06287e">getDamage</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> damage<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">setDamage</span><span style="color: #666666">(</span><span style="color: #902000">float</span> damage<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">damage</span> <span style="color: #666666">=</span> damage<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>It is a simple java object without any knowledge of the surrounding world. It has a position, rotation, speed and damage. These states are defined by the member variables and are accessible through the getter and setter methods.</p>
+
+<p>The game requires a few more models: obstacles and enemies on a map. For simplicity the obstacles will have just a position on the map and the enemies will be standing objects. The map will be a 2 dimensional array holding the enemies, obstacles and the droid. The map will be called <code>Arena</code> to differentiate from the standard Java map and will be populated with obstacles and enemies when it is constructed.</p>
+
+<p><code>Obstacle.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Obstacle</span> <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> x<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> y<span style="color: #666666">;</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">Obstacle</span><span style="color: #666666">(</span><span style="color: #902000">float</span> x<span style="color: #666666">,</span> <span style="color: #902000">float</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">x</span> <span style="color: #666666">=</span> x<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">y</span> <span style="color: #666666">=</span> y<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">float</span> <span style="color: #06287e">getX</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> x<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">float</span> <span style="color: #06287e">getY</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> y<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><code>Enemy.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Enemy</span> <span style="color: #666666">{</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> x<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> y<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">int</span> hitpoints <span style="color: #666666">=</span> <span style="color: #40a070">10</span><span style="color: #666666">;</span>
+    
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">Enemy</span><span style="color: #666666">(</span><span style="color: #902000">float</span> x<span style="color: #666666">,</span> <span style="color: #902000">float</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">x</span> <span style="color: #666666">=</span> x<span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">y</span> <span style="color: #666666">=</span> y<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">float</span> <span style="color: #06287e">getX</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> x<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">float</span> <span style="color: #06287e">getY</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> y<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">int</span> <span style="color: #06287e">getHitpoints</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> hitpoints<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">setHitpoints</span><span style="color: #666666">(</span><span style="color: #902000">int</span> hitpoints<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">hitpoints</span> <span style="color: #666666">=</span> hitpoints<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p><code>Arena.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.util.ArrayList</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.util.List</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.util.Random</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Arena</span> <span style="color: #666666">{</span>
+    
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> <span style="color: #007020; font-weight: bold">final</span> <span style="color: #902000">int</span> WIDTH <span style="color: #666666">=</span> <span style="color: #40a070">480</span> <span style="color: #666666">/</span> <span style="color: #40a070">32</span><span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">static</span> <span style="color: #007020; font-weight: bold">final</span> <span style="color: #902000">int</span> HEIGHT <span style="color: #666666">=</span> <span style="color: #40a070">320</span> <span style="color: #666666">/</span> <span style="color: #40a070">32</span><span style="color: #666666">;</span>
+    
+    <span style="color: #007020; font-weight: bold">private</span> <span style="color: #007020; font-weight: bold">static</span> Random random <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Random<span style="color: #666666">(</span>System<span style="color: #666666">.</span><span style="color: #4070a0">currentTimeMillis</span><span style="color: #666666">());</span>
+
+    <span style="color: #007020; font-weight: bold">private</span> Object<span style="color: #666666">[][]</span> grid<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> List<span style="color: #666666">&lt;</span>Obstacle<span style="color: #666666">&gt;</span>    obstacles <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> ArrayList<span style="color: #666666">&lt;</span>Obstacle<span style="color: #666666">&gt;();</span>
+    <span style="color: #007020; font-weight: bold">private</span> List<span style="color: #666666">&lt;</span>Enemy<span style="color: #666666">&gt;</span>       enemies <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> ArrayList<span style="color: #666666">&lt;</span>Enemy<span style="color: #666666">&gt;();</span>
+    <span style="color: #007020; font-weight: bold">private</span> Droid droid<span style="color: #666666">;</span>
+    
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">Arena</span><span style="color: #666666">(</span>Droid droid<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">droid</span> <span style="color: #666666">=</span> droid<span style="color: #666666">;</span>
+
+        grid <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Object<span style="color: #666666">[</span>HEIGHT<span style="color: #666666">][</span>WIDTH<span style="color: #666666">];</span>
+        <span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span><span style="color: #902000">int</span> i <span style="color: #666666">=</span> <span style="color: #40a070">0</span><span style="color: #666666">;</span> i <span style="color: #666666">&lt;</span> WIDTH<span style="color: #666666">;</span> i<span style="color: #666666">++)</span> <span style="color: #666666">{</span>
+            <span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span><span style="color: #902000">int</span> j <span style="color: #666666">=</span> <span style="color: #40a070">0</span><span style="color: #666666">;</span> j <span style="color: #666666">&lt;</span> HEIGHT<span style="color: #666666">;</span> j<span style="color: #666666">++)</span> <span style="color: #666666">{</span>
+                grid<span style="color: #666666">[</span>j<span style="color: #666666">][</span>i<span style="color: #666666">]</span> <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">null</span><span style="color: #666666">;</span>
+            <span style="color: #666666">}</span>
+        <span style="color: #666666">}</span>
+        <span style="color: #60a0b0; font-style: italic">// add 5 obstacles and 5 enemies at random positions</span>
+        <span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span><span style="color: #902000">int</span> i <span style="color: #666666">=</span> <span style="color: #40a070">0</span><span style="color: #666666">;</span> i <span style="color: #666666">&lt;</span> <span style="color: #40a070">5</span><span style="color: #666666">;</span> i<span style="color: #666666">++)</span> <span style="color: #666666">{</span>
+            <span style="color: #902000">int</span> x <span style="color: #666666">=</span> random<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span>WIDTH<span style="color: #666666">);</span>
+            <span style="color: #902000">int</span> y <span style="color: #666666">=</span> random<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span>HEIGHT<span style="color: #666666">);</span>
+            <span style="color: #007020; font-weight: bold">while</span> <span style="color: #666666">(</span>grid<span style="color: #666666">[</span>y<span style="color: #666666">][</span>x<span style="color: #666666">]</span> <span style="color: #666666">!=</span> <span style="color: #007020; font-weight: bold">null</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+                x <span style="color: #666666">=</span> random<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span>WIDTH<span style="color: #666666">);</span>
+                y <span style="color: #666666">=</span> random<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span>HEIGHT<span style="color: #666666">);</span>
+            <span style="color: #666666">}</span>
+            grid<span style="color: #666666">[</span>y<span style="color: #666666">][</span>x<span style="color: #666666">]</span> <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Obstacle<span style="color: #666666">(</span>x<span style="color: #666666">,</span> y<span style="color: #666666">);</span>
+            obstacles<span style="color: #666666">.</span><span style="color: #4070a0">add</span><span style="color: #666666">((</span>Obstacle<span style="color: #666666">)</span> grid<span style="color: #666666">[</span>y<span style="color: #666666">][</span>x<span style="color: #666666">]);</span>
+            <span style="color: #007020; font-weight: bold">while</span> <span style="color: #666666">(</span>grid<span style="color: #666666">[</span>y<span style="color: #666666">][</span>x<span style="color: #666666">]</span> <span style="color: #666666">!=</span> <span style="color: #007020; font-weight: bold">null</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+                x <span style="color: #666666">=</span> random<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span>WIDTH<span style="color: #666666">);</span>
+                y <span style="color: #666666">=</span> random<span style="color: #666666">.</span><span style="color: #4070a0">nextInt</span><span style="color: #666666">(</span>HEIGHT<span style="color: #666666">);</span>
+            <span style="color: #666666">}</span>
+            grid<span style="color: #666666">[</span>y<span style="color: #666666">][</span>x<span style="color: #666666">]</span> <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Enemy<span style="color: #666666">(</span>x<span style="color: #666666">,</span> y<span style="color: #666666">);</span>
+            enemies<span style="color: #666666">.</span><span style="color: #4070a0">add</span><span style="color: #666666">((</span>Enemy<span style="color: #666666">)</span> grid<span style="color: #666666">[</span>y<span style="color: #666666">][</span>x<span style="color: #666666">]);</span>
+        <span style="color: #666666">}</span>
+    <span style="color: #666666">}</span>
+    
+    <span style="color: #007020; font-weight: bold">public</span> List<span style="color: #666666">&lt;</span>Obstacle<span style="color: #666666">&gt;</span> <span style="color: #06287e">getObstacles</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> obstacles<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> List<span style="color: #666666">&lt;</span>Enemy<span style="color: #666666">&gt;</span> <span style="color: #06287e">getEnemies</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> enemies<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    <span style="color: #007020; font-weight: bold">public</span> Droid <span style="color: #06287e">getDroid</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> droid<span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>The <code>Arena</code> is a more complex object but reading through the code should make it easy to understand. It basically groups all the models together into a single world. Our game world is the arena which contains all the elements like our droid, enemies and obstacles.</p>
+
+<p>The <code>WIDTH</code> and <code>HEIGHT</code> are calculated based on the resolution I have chosen. A cell (tile) on the grid will be <strong>32</strong> pixels wide and tall so I just compute how many cells go onto the grid.</p>
+
+<p>In the constructor (line #19) the grid is set up and 5 obstacles and 5 enemies are randomly placed. This will make up the starting arena and our game world.</p>
+
+<p>In order to keep the main loop tidy, we&rsquo;ll delegate the update and rendering to the <code>GameEngine</code>. This is a simple class that will process the user input, update the states of the models and will render the world. It is a tiny glue framework to make all these happen.</p>
+
+<p>The <code>GameEngine.java</code> stub</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.controller</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.Event</span><span style="color: #666666">;</span>
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.Graphics</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">GameEngine</span> <span style="color: #666666">{</span>
+
+    <span style="color: #60a0b0; font-style: italic">/** handle the Event passed from the main applet **/</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">handleEvent</span><span style="color: #666666">(</span>Event e<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">switch</span> <span style="color: #666666">(</span>e<span style="color: #666666">.</span><span style="color: #4070a0">id</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">KEY_PRESS</span><span style="color: #666666">:</span>
+        <span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">KEY_ACTION</span><span style="color: #666666">:</span>
+            <span style="color: #60a0b0; font-style: italic">// key pressed</span>
+            <span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">KEY_RELEASE</span><span style="color: #666666">:</span>
+            <span style="color: #60a0b0; font-style: italic">// key released</span>
+            <span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">MOUSE_DOWN</span><span style="color: #666666">:</span>
+            <span style="color: #60a0b0; font-style: italic">// mouse button pressed</span>
+            <span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">MOUSE_UP</span><span style="color: #666666">:</span>
+            <span style="color: #60a0b0; font-style: italic">// mouse button released</span>
+            <span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">MOUSE_MOVE</span><span style="color: #666666">:</span>
+            <span style="color: #60a0b0; font-style: italic">// mouse is being moved</span>
+            <span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+        <span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">MOUSE_DRAG</span><span style="color: #666666">:</span>
+            <span style="color: #60a0b0; font-style: italic">// mouse is being dragged (button pressed)</span>
+            <span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+        <span style="color: #666666">}</span>
+        <span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">false</span><span style="color: #666666">;</span>
+    <span style="color: #666666">}</span>
+    
+    <span style="color: #60a0b0; font-style: italic">/** the update method with the deltaTime in seconds **/</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">update</span><span style="color: #666666">(</span><span style="color: #902000">float</span> deltaTime<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #60a0b0; font-style: italic">// empty</span>
+    <span style="color: #666666">}</span>
+    
+    <span style="color: #60a0b0; font-style: italic">/** this will render the whole world **/</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">render</span><span style="color: #666666">(</span>Graphics g<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #60a0b0; font-style: italic">// empty</span>
+    <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>To use the engine the <code>Droids.java</code> class needs to be modified. We need to create an instance of the <code>GameEngine</code> class and call the <code>update()</code> and <code>render()</code> methods at the appropriate times. Also we need to delegate the input processing to the engine.</p>
+
+<p>Add the following lines:</p>
+
+<p>Declare the private member and also instantiate it.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">private</span> GameEngine engine <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> GameEngine<span style="color: #666666">();</span>
+</pre></div>
+
+<p>The modified game loop looks like this:</p>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 1 </span><span style="color: #007020; font-weight: bold">while</span> <span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">true</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 2 </span>    <span style="color: #902000">long</span> lastTime <span style="color: #666666">=</span> System<span style="color: #666666">.</span><span style="color: #4070a0">nanoTime</span><span style="color: #666666">();</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 3 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 4 </span>    g<span style="color: #666666">.</span><span style="color: #4070a0">setColor</span><span style="color: #666666">(</span>Color<span style="color: #666666">.</span><span style="color: #4070a0">black</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 5 </span>    g<span style="color: #666666">.</span><span style="color: #4070a0">fillRect</span><span style="color: #666666">(</span><span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">480</span><span style="color: #666666">,</span> <span style="color: #40a070">320</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 6 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 7 </span><span style="background-color: #ffffcc">    <span style="color: #60a0b0; font-style: italic">// Update the state (convert to seconds)</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 8 </span><span style="background-color: #ffffcc">    engine<span style="color: #666666">.</span><span style="color: #4070a0">update</span><span style="color: #666666">((</span><span style="color: #902000">float</span><span style="color: #666666">)(</span>delta <span style="color: #666666">/</span> <span style="color: #40a070">1000000000.0</span><span style="color: #666666">));</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 9 </span><span style="background-color: #ffffcc">    <span style="color: #60a0b0; font-style: italic">// Render the world</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">10 </span><span style="background-color: #ffffcc">    engine<span style="color: #666666">.</span><span style="color: #4070a0">render</span><span style="color: #666666">(</span>g<span style="color: #666666">);</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">11 </span>    
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">12 </span>    <span style="color: #60a0b0; font-style: italic">// Draw the entire results on the screen.</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">13 </span>    appletGraphics<span style="color: #666666">.</span><span style="color: #4070a0">drawImage</span><span style="color: #666666">(</span>screen<span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #007020; font-weight: bold">null</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">14 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">15 </span>    <span style="color: #60a0b0; font-style: italic">// Lock the frame rate</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">16 </span>    delta <span style="color: #666666">=</span> System<span style="color: #666666">.</span><span style="color: #4070a0">nanoTime</span><span style="color: #666666">()</span> <span style="color: #666666">-</span> lastTime<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">17 </span>    <span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>delta <span style="color: #666666">&lt;</span> <span style="color: #40a070">20000000L</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">18 </span>        <span style="color: #007020; font-weight: bold">try</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">19 </span>            Thread<span style="color: #666666">.</span><span style="color: #4070a0">sleep</span><span style="color: #666666">((</span><span style="color: #40a070">20000000L</span> <span style="color: #666666">-</span> delta<span style="color: #666666">)</span> <span style="color: #666666">/</span> <span style="color: #40a070">1000000L</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">20 </span>        <span style="color: #666666">}</span> <span style="color: #007020; font-weight: bold">catch</span> <span style="color: #666666">(</span>Exception e<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">21 </span>            <span style="color: #60a0b0; font-style: italic">// It&#39;s an interrupted exception, and nobody cares</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">22 </span>        <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">23 </span>    <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">24 </span><span style="color: #666666">}</span>
+</pre></div>
+
+
+<p>The highlighted lines (#7-#10) contain the delegation to the <code>update()</code> and <code>render()</code> methods. Note that there is a conversion to seconds from nano seconds. It&rsquo;s very useful to work in seconds as we can work with real world values.</p>
+
+<p><strong>Important</strong>: The update needs to happen after the delta (time elapsed since the last update) has been calculated. Also the render should be called after the update so it will display the current state of the objects. Note that the screen is cleared each time before the render (painted black).</p>
+
+<p>The last thing to be done is to delegate the input handling.</p>
+
+<p>Replace the current <code>handleEvent</code> method with the following snippet:</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">handleEvent</span><span style="color: #666666">(</span>Event e<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+        <span style="color: #007020; font-weight: bold">return</span> engine<span style="color: #666666">.</span><span style="color: #4070a0">handleEvent</span><span style="color: #666666">(</span>e<span style="color: #666666">);</span>
+    <span style="color: #666666">}</span>
+</pre></div>
+
+<p>Very simple straightforward delegation.</p>
+
+<p>Running the applet yields no particular exciting result. Just a black screen. It makes sense as everything is just a stub apart from the screen being cleared every cycle.</p>
+
+<h4 id="initialising-the-models-world">Initialising the models (world)</h4>
+
+<p>Our game needs a droid and some enemies. By design, the world is our <code>Arena</code>. By instantiating it, we have created a world (check the constructor in <code>Arena</code>).</p>
+
+<p>We will create the world in the <code>GameEngine</code> as the engine is responsible for telling the view what to render.</p>
+
+<p>We also need the <code>Droid</code> to be created here because the <code>Arena</code> requires it its constructor. Is good to have it separate as the droid will be controlled by the player.</p>
+
+<p>Add the following members to the <code>GameEngine</code> along with the constructor which initialises the world.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">private</span> Arena arena<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">private</span> Droid droid<span style="color: #666666">;</span>
+
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">GameEngine</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+        droid <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Droid<span style="color: #666666">();</span>
+        <span style="color: #60a0b0; font-style: italic">// position droid in the middle</span>
+        droid<span style="color: #666666">.</span><span style="color: #4070a0">setX</span><span style="color: #666666">(</span>Arena<span style="color: #666666">.</span><span style="color: #4070a0">WIDTH</span> <span style="color: #666666">/</span> <span style="color: #40a070">2</span><span style="color: #666666">);</span>
+        droid<span style="color: #666666">.</span><span style="color: #4070a0">setY</span><span style="color: #666666">(</span>Arena<span style="color: #666666">.</span><span style="color: #4070a0">HEIGHT</span> <span style="color: #666666">/</span> <span style="color: #40a070">2</span><span style="color: #666666">);</span>
+        arena <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Arena<span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+    <span style="color: #666666">}</span>
+</pre></div>
+
+<p><strong>Note</strong>: <code>Arena</code>&rsquo;s constructor needs to be modified, so the <code>Droid</code> gets added to the grid before the obstacles and enemies.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #666666">...</span>
+    <span style="color: #60a0b0; font-style: italic">// add the droid</span>
+    grid<span style="color: #666666">[(</span><span style="color: #902000">int</span><span style="color: #666666">)</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()][(</span><span style="color: #902000">int</span><span style="color: #666666">)</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()]</span> <span style="color: #666666">=</span> droid<span style="color: #666666">;</span>
+<span style="color: #666666">...</span>
+</pre></div>
+
+<p>Running the applet again, won&rsquo;t change the output but we have our world created. We can add logging to see the result but that won&rsquo;t be interesting. Let&rsquo;s create our first view which will reveal our world.</p>
+
+<h4 id="creating-the-first-view-renderer">Creating the first View/Renderer</h4>
+
+<p>We&rsquo;ve put a lot of effort in creating the arena and world, we&rsquo;re eager to actually see it. Because of this, we will create a quick and dirty renderer to reveal the world. By quick and dirty I mean no fancy images or anything but simple squares, circles and placeholders. Once we are happy that the game elements are in we can work on a more elaborate view to replace the squares and circles with fancy graphics. This is where the power of decoupling shines.</p>
+
+<p>Steps to render the world.</p>
+
+<ul>
+<li>Draw the grid to see where the cells are.</li>
+<li>Obstacles will be drawn as blue squares and they will occupy the cells</li>
+<li>Enemies will be red circles</li>
+<li>The droid will be a green circle with a brown square</li>
+</ul>
+
+<p>First we create the renderer interface. We use this to establish a single way to interact with the renderer and it will make it easy to create more views without affecting the game engine. To read more on why is a good idea check <a href="/the-strategy-pattern">this</a> and <a href="/the-state-pattern">this</a>.</p>
+
+<p>Create an interface in the <code>view</code> package.</p>
+
+<p><code>Renderer.java</code></p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.view</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.Graphics</span><span style="color: #666666">;</span>
+
+<span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">interface</span> <span style="color: #0e84b5; font-weight: bold">Renderer</span> <span style="color: #666666">{</span>
+    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">render</span><span style="color: #666666">(</span>Graphics g<span style="color: #666666">);</span>
+<span style="color: #666666">}</span>
+</pre></div>
+
+<p>That is all. It contains one single method: <code>render(Graphics g)</code>. The <code>Graphics g</code> is the canvas that is passed from the applet. Ideally the interface will be agnostic of this and each implementation will use a different back-end but the purpose of this exercise is to describe the MVC not to create a full framework. Because we have chosen applet we need the <code>Graphics</code> object.</p>
+
+<p>The concrete implementation looks like this:</p>
+
+<p><code>SimpleArenaRenderer.java</code> (in the <code>view</code> package)</p>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 1 </span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.view</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 2 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 3 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.Color</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 4 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.Graphics</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 5 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 6 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model.Arena</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 7 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model.Droid</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 8 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model.Enemy</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 9 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model.Obstacle</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">10 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">11 </span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">SimpleArenaRenderer</span> <span style="color: #007020; font-weight: bold">implements</span> Renderer <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">12 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">13 </span>	<span style="color: #007020; font-weight: bold">private</span> Arena arena<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">14 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">15 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">SimpleArenaRenderer</span><span style="color: #666666">(</span>Arena arena<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">16 </span>		<span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">arena</span> <span style="color: #666666">=</span> arena<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">17 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">18 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">19 </span>	<span style="color: #555555; font-weight: bold">@Override</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">20 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">render</span><span style="color: #666666">(</span>Graphics g<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">21 </span>		<span style="color: #60a0b0; font-style: italic">// render the grid</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">22 </span>		<span style="color: #902000">int</span> cellSize <span style="color: #666666">=</span> <span style="color: #40a070">32</span><span style="color: #666666">;</span> <span style="color: #60a0b0; font-style: italic">// hard coded</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">23 </span>		g<span style="color: #666666">.</span><span style="color: #4070a0">setColor</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">new</span> Color<span style="color: #666666">(</span><span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0.5f</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0.75f</span><span style="color: #666666">));</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">24 </span>		<span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span><span style="color: #902000">int</span> i <span style="color: #666666">=</span> <span style="color: #40a070">0</span><span style="color: #666666">;</span> i <span style="color: #666666">&lt;=</span> Arena<span style="color: #666666">.</span><span style="color: #4070a0">WIDTH</span><span style="color: #666666">;</span> i<span style="color: #666666">++)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">25 </span>			g<span style="color: #666666">.</span><span style="color: #4070a0">drawLine</span><span style="color: #666666">(</span>i <span style="color: #666666">*</span> cellSize<span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> i <span style="color: #666666">*</span> cellSize<span style="color: #666666">,</span> Arena<span style="color: #666666">.</span><span style="color: #4070a0">HEIGHT</span> <span style="color: #666666">*</span> cellSize<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">26 </span>			<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>i <span style="color: #666666">&lt;=</span> Arena<span style="color: #666666">.</span><span style="color: #4070a0">WIDTH</span><span style="color: #666666">)</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">27 </span>				g<span style="color: #666666">.</span><span style="color: #4070a0">drawLine</span><span style="color: #666666">(</span><span style="color: #40a070">0</span><span style="color: #666666">,</span> i <span style="color: #666666">*</span> cellSize<span style="color: #666666">,</span> Arena<span style="color: #666666">.</span><span style="color: #4070a0">WIDTH</span> <span style="color: #666666">*</span> cellSize<span style="color: #666666">,</span> i <span style="color: #666666">*</span> cellSize<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">28 </span>		<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">29 </span>		
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">30 </span>		<span style="color: #60a0b0; font-style: italic">// render the obstacles</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">31 </span>		g<span style="color: #666666">.</span><span style="color: #4070a0">setColor</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">new</span> Color<span style="color: #666666">(</span><span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">1f</span><span style="color: #666666">));</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">32 </span>		<span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span>Obstacle obs <span style="color: #666666">:</span> arena<span style="color: #666666">.</span><span style="color: #4070a0">getObstacles</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">33 </span>			<span style="color: #902000">int</span> x <span style="color: #666666">=</span> <span style="color: #666666">(</span><span style="color: #902000">int</span><span style="color: #666666">)</span> <span style="color: #666666">(</span>obs<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">*</span> cellSize<span style="color: #666666">)</span> <span style="color: #666666">+</span> <span style="color: #40a070">2</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">34 </span>			<span style="color: #902000">int</span> y <span style="color: #666666">=</span> <span style="color: #666666">(</span><span style="color: #902000">int</span><span style="color: #666666">)</span> <span style="color: #666666">(</span>obs<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">*</span> cellSize<span style="color: #666666">)</span> <span style="color: #666666">+</span> <span style="color: #40a070">2</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">35 </span>			g<span style="color: #666666">.</span><span style="color: #4070a0">fillRect</span><span style="color: #666666">(</span>x<span style="color: #666666">,</span> y<span style="color: #666666">,</span> cellSize <span style="color: #666666">-</span> <span style="color: #40a070">4</span><span style="color: #666666">,</span> cellSize <span style="color: #666666">-</span> <span style="color: #40a070">4</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">36 </span>		<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">37 </span>		
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">38 </span>		<span style="color: #60a0b0; font-style: italic">// render the enemies</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">39 </span>		g<span style="color: #666666">.</span><span style="color: #4070a0">setColor</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">new</span> Color<span style="color: #666666">(</span><span style="color: #40a070">1f</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">));</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">40 </span>		<span style="color: #007020; font-weight: bold">for</span> <span style="color: #666666">(</span>Enemy enemy <span style="color: #666666">:</span> arena<span style="color: #666666">.</span><span style="color: #4070a0">getEnemies</span><span style="color: #666666">())</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">41 </span>			<span style="color: #902000">int</span> x <span style="color: #666666">=</span> <span style="color: #666666">(</span><span style="color: #902000">int</span><span style="color: #666666">)</span> <span style="color: #666666">(</span>enemy<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">*</span> cellSize<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">42 </span>			<span style="color: #902000">int</span> y <span style="color: #666666">=</span> <span style="color: #666666">(</span><span style="color: #902000">int</span><span style="color: #666666">)</span> <span style="color: #666666">(</span>enemy<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">*</span> cellSize<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">43 </span>			g<span style="color: #666666">.</span><span style="color: #4070a0">fillOval</span><span style="color: #666666">(</span>x <span style="color: #666666">+</span> <span style="color: #40a070">2</span><span style="color: #666666">,</span> y <span style="color: #666666">+</span> <span style="color: #40a070">2</span><span style="color: #666666">,</span> cellSize <span style="color: #666666">-</span> <span style="color: #40a070">4</span><span style="color: #666666">,</span> cellSize <span style="color: #666666">-</span> <span style="color: #40a070">4</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">44 </span>		<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">45 </span>		
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">46 </span>		<span style="color: #60a0b0; font-style: italic">// render player droid</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">47 </span>		g<span style="color: #666666">.</span><span style="color: #4070a0">setColor</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">new</span> Color<span style="color: #666666">(</span><span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">1f</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">));</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">48 </span>		Droid droid <span style="color: #666666">=</span> arena<span style="color: #666666">.</span><span style="color: #4070a0">getDroid</span><span style="color: #666666">();</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">49 </span>		<span style="color: #902000">int</span> x <span style="color: #666666">=</span> <span style="color: #666666">(</span><span style="color: #902000">int</span><span style="color: #666666">)</span> <span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">*</span> cellSize<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">50 </span>		<span style="color: #902000">int</span> y <span style="color: #666666">=</span> <span style="color: #666666">(</span><span style="color: #902000">int</span><span style="color: #666666">)</span> <span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">*</span> cellSize<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">51 </span>		g<span style="color: #666666">.</span><span style="color: #4070a0">fillOval</span><span style="color: #666666">(</span>x <span style="color: #666666">+</span> <span style="color: #40a070">2</span><span style="color: #666666">,</span> y <span style="color: #666666">+</span> <span style="color: #40a070">2</span><span style="color: #666666">,</span> cellSize <span style="color: #666666">-</span> <span style="color: #40a070">4</span><span style="color: #666666">,</span> cellSize <span style="color: #666666">-</span> <span style="color: #40a070">4</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">52 </span>		<span style="color: #60a0b0; font-style: italic">// render square on droid</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">53 </span>		g<span style="color: #666666">.</span><span style="color: #4070a0">setColor</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">new</span> Color<span style="color: #666666">(</span><span style="color: #40a070">0.7f</span><span style="color: #666666">,</span> <span style="color: #40a070">0.5f</span><span style="color: #666666">,</span> <span style="color: #40a070">0f</span><span style="color: #666666">));</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">54 </span>		g<span style="color: #666666">.</span><span style="color: #4070a0">fillRect</span><span style="color: #666666">(</span>x <span style="color: #666666">+</span> <span style="color: #40a070">10</span><span style="color: #666666">,</span> y <span style="color: #666666">+</span> <span style="color: #40a070">10</span><span style="color: #666666">,</span> cellSize <span style="color: #666666">-</span> <span style="color: #40a070">20</span><span style="color: #666666">,</span> cellSize <span style="color: #666666">-</span> <span style="color: #40a070">20</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">55 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">56 </span><span style="color: #666666">}</span>
+</pre></div>
+
+
+<p>Lines #13 - #17 declare the <code>Arena</code> object and make sure that it is set when the renderer is constructed. I called it ArenaRenderer because we will render the arena (world).</p>
+
+<p>The only method in the renderer is the <code>render()</code> method. Let&rsquo;s see what it does step by step.</p>
+
+<p>#22 - Declare a cell size in pixels. It is 32. It&rsquo;s hard coded as in the <code>Arena</code> class.</p>
+
+<p>#23 - #28 - The grid is being drawn. It is a simple grid. First the colour is set to dark green and lines are drawn at equal distance.</p>
+
+<p>Drawing the obstacles - blue squares</p>
+
+<p>#31 - Set the brush color to blue.</p>
+
+<p>#32 - #36 - Iterate through all the obstacles in the arena and for each it draws a blue filled rectangle slightly smaller than the cell on the grid.</p>
+
+<p>#39 - #44 - Sets the color to red and by iterating through the enemies in the arena, it draws a circle at the respective position.</p>
+
+<p>#47 - #54 - Finally draws the droid as a green circle with a brown square on top.</p>
+
+<p><strong>Note</strong> that the arena in the real world has a width of 15 (480 / 32). So the droid will always be at the same position (7, 5) and the renderer works out its position on the screen by using a unit measure conversion. In this case is 1 unit in world coordinate is 32 pixels on the screen.</p>
+
+<p>By modifying the <code>GameEngine</code> to use the newly created view (<code>SimpleArenaRenderer</code>) we get the result.</p>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 1 </span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">GameEngine</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 2 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 3 </span>	<span style="color: #007020; font-weight: bold">private</span> Arena arena<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 4 </span>	<span style="color: #007020; font-weight: bold">private</span> Droid droid<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 5 </span><span style="background-color: #ffffcc">	<span style="color: #007020; font-weight: bold">private</span> Renderer renderer<span style="color: #666666">;</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 6 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 7 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">GameEngine</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 8 </span>		droid <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Droid<span style="color: #666666">();</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 9 </span>		<span style="color: #60a0b0; font-style: italic">// position droid in the middle</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">10 </span>		droid<span style="color: #666666">.</span><span style="color: #4070a0">setX</span><span style="color: #666666">(</span>Arena<span style="color: #666666">.</span><span style="color: #4070a0">WIDTH</span> <span style="color: #666666">/</span> <span style="color: #40a070">2</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">11 </span>		droid<span style="color: #666666">.</span><span style="color: #4070a0">setY</span><span style="color: #666666">(</span>Arena<span style="color: #666666">.</span><span style="color: #4070a0">HEIGHT</span> <span style="color: #666666">/</span> <span style="color: #40a070">2</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">12 </span>		arena <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Arena<span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">13 </span>		
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">14 </span>		<span style="color: #60a0b0; font-style: italic">// setup renderer (view)</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">15 </span><span style="background-color: #ffffcc">		renderer <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> SimpleArenaRenderer<span style="color: #666666">(</span>arena<span style="color: #666666">);</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">16 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">17 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">18 </span>	<span style="color: #60a0b0; font-style: italic">/** ... code stripped ... **/</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">19 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">20 </span>	<span style="color: #60a0b0; font-style: italic">/** this will render the whole world **/</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">21 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">render</span><span style="color: #666666">(</span>Graphics g<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">22 </span><span style="background-color: #ffffcc">		renderer<span style="color: #666666">.</span><span style="color: #4070a0">render</span><span style="color: #666666">(</span>g<span style="color: #666666">);</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">23 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">24 </span><span style="color: #666666">}</span>
+</pre></div>
+
+
+<p>Pay attention to the highlighted lines (5, 15, 22). These are the lines where the renderer (view) is added to the game.</p>
+
+<p>The result should look like the following image (the positions are random apart from the player&rsquo;s droid):</p>
+
+<p><img src="/images/archive/2012/02/SimpleArenaRenderer.png" alt="The result of the first view" /></p>
+
+<p>This is a great view to test out the arena and see the models. It&rsquo;s extremely easy to create a new view that instead of shapes (squares and circles) displays actual sprites.</p>
+
+<h4 id="controller-for-handling-input-and-update-models">Controller for Handling Input and Update Models</h4>
+
+<p>So far the game does nothing but displays the current state of the world (arena). For simplicity we will update just one state of the droid, its position.</p>
+
+<p>The steps to move the droid based on user input are:</p>
+
+<ul>
+<li>On mouse up check if the clicked cell on the grid is empty. This means that it does contain any objects which can be <code>Enemy</code> or <code>Obstacle</code> instances.</li>
+<li>If the cell is empty, the controller will create an action that will move the droid at a constant speed until it reaches the destination.</li>
+</ul>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 1 </span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.controller</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 2 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 3 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model.Arena</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 4 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model.Droid</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 5 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 6 </span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">ArenaController</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 7 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 8 </span>	<span style="color: #007020; font-weight: bold">private</span> <span style="color: #007020; font-weight: bold">static</span> <span style="color: #007020; font-weight: bold">final</span> <span style="color: #902000">int</span> unit <span style="color: #666666">=</span> <span style="color: #40a070">32</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 9 </span>	<span style="color: #007020; font-weight: bold">private</span> Arena arena<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">10 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">11 </span>	<span style="color: #60a0b0; font-style: italic">/** the target cell **/</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">12 </span>	<span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> targetX<span style="color: #666666">,</span> targetY<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">13 </span>	<span style="color: #60a0b0; font-style: italic">/** true if the droid moves **/</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">14 </span>	<span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">boolean</span> moving <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">false</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">15 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">16 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">ArenaController</span><span style="color: #666666">(</span>Arena arena<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">17 </span>		<span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">arena</span> <span style="color: #666666">=</span> arena<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">18 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">19 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">20 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">update</span><span style="color: #666666">(</span><span style="color: #902000">float</span> delta<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">21 </span>		Droid droid <span style="color: #666666">=</span> arena<span style="color: #666666">.</span><span style="color: #4070a0">getDroid</span><span style="color: #666666">();</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">22 </span>		<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>moving<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">23 </span>			<span style="color: #60a0b0; font-style: italic">// move on X</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">24 </span>			<span style="color: #902000">int</span> bearing <span style="color: #666666">=</span> <span style="color: #40a070">1</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">25 </span>			<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">&gt;</span> targetX<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">26 </span>				bearing <span style="color: #666666">=</span> <span style="color: #666666">-</span><span style="color: #40a070">1</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">27 </span>			<span style="color: #666666">}</span> 
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">28 </span>			<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">!=</span> targetX<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">29 </span>				droid<span style="color: #666666">.</span><span style="color: #4070a0">setX</span><span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> bearing <span style="color: #666666">*</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getSpeed</span><span style="color: #666666">()</span> <span style="color: #666666">*</span> delta<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">30 </span>				<span style="color: #60a0b0; font-style: italic">// check if arrived</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">31 </span>				<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">((</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">&lt;</span> targetX <span style="color: #666666">&amp;&amp;</span> bearing <span style="color: #666666">==</span> <span style="color: #666666">-</span><span style="color: #40a070">1</span><span style="color: #666666">)</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">32 </span>						<span style="color: #666666">||</span> <span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">&gt;</span> targetX <span style="color: #666666">&amp;&amp;</span> bearing <span style="color: #666666">==</span> <span style="color: #40a070">1</span><span style="color: #666666">))</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">setX</span><span style="color: #666666">(</span>targetX<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">33 </span>			<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">34 </span>			<span style="color: #60a0b0; font-style: italic">// move on Y</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">35 </span>			bearing <span style="color: #666666">=</span> <span style="color: #40a070">1</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">36 </span>			<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">&gt;</span> targetY<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">37 </span>				bearing <span style="color: #666666">=</span> <span style="color: #666666">-</span><span style="color: #40a070">1</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">38 </span>			<span style="color: #666666">}</span> 
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">39 </span>			<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">!=</span> targetY<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">40 </span>				droid<span style="color: #666666">.</span><span style="color: #4070a0">setY</span><span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">+</span> bearing <span style="color: #666666">*</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getSpeed</span><span style="color: #666666">()</span> <span style="color: #666666">*</span> delta<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">41 </span>				<span style="color: #60a0b0; font-style: italic">// check if arrived</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">42 </span>				<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">((</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">&lt;</span> targetY <span style="color: #666666">&amp;&amp;</span> bearing <span style="color: #666666">==</span> <span style="color: #666666">-</span><span style="color: #40a070">1</span><span style="color: #666666">)</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">43 </span>						<span style="color: #666666">||</span> <span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">&gt;</span> targetY <span style="color: #666666">&amp;&amp;</span> bearing <span style="color: #666666">==</span> <span style="color: #40a070">1</span><span style="color: #666666">))</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">setY</span><span style="color: #666666">(</span>targetY<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">44 </span>			<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">45 </span>			<span style="color: #60a0b0; font-style: italic">// check if arrived</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">46 </span>			<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>droid<span style="color: #666666">.</span><span style="color: #4070a0">getX</span><span style="color: #666666">()</span> <span style="color: #666666">==</span> targetX <span style="color: #666666">&amp;&amp;</span> droid<span style="color: #666666">.</span><span style="color: #4070a0">getY</span><span style="color: #666666">()</span> <span style="color: #666666">==</span> targetY<span style="color: #666666">)</span> 
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">47 </span>				moving <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">false</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">48 </span>		<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">49 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">50 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">51 </span>	<span style="color: #60a0b0; font-style: italic">/** triggered with the coordinates every click **/</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">52 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">onClick</span><span style="color: #666666">(</span><span style="color: #902000">int</span> x<span style="color: #666666">,</span> <span style="color: #902000">int</span> y<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">53 </span>		targetX <span style="color: #666666">=</span> x <span style="color: #666666">/</span> unit<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">54 </span>		targetY <span style="color: #666666">=</span> y <span style="color: #666666">/</span> unit<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">55 </span>		<span style="color: #007020; font-weight: bold">if</span> <span style="color: #666666">(</span>arena<span style="color: #666666">.</span><span style="color: #4070a0">getGrid</span><span style="color: #666666">()[(</span><span style="color: #902000">int</span><span style="color: #666666">)</span> targetY<span style="color: #666666">][(</span><span style="color: #902000">int</span><span style="color: #666666">)</span> targetX<span style="color: #666666">]</span> <span style="color: #666666">==</span> <span style="color: #007020; font-weight: bold">null</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">56 </span>			<span style="color: #60a0b0; font-style: italic">// start moving the droid towards the target</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">57 </span>			moving <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">true</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">58 </span>			<span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">true</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">59 </span>		<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">60 </span>		<span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">false</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">61 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">62 </span><span style="color: #666666">}</span>
+</pre></div>
+
+
+<p>The following breakdown explains the logic and important bits.</p>
+
+<p><strong>#08</strong> - The <code>unit</code> represents how many pixels are in a cell which represents 1 unit in world coordinates. It&rsquo;s hard-coded and not optimal but for the demo is good enough.</p>
+
+<p><strong>#09</strong> - The <code>Arena</code> the controller will control. It is set when the controller is constructed (line #16).</p>
+
+<p><strong>#12</strong> - The target coordinates of the click in world units.</p>
+
+<p><strong>#14</strong> - It is <code>true</code> when the droid is moving. This is the &#8220;move&#8221; actions&rsquo; state. Ideally this should be a stand alone class, but to demonstrate the controller and keep it concise, we&rsquo;ll hack an action together inside the controller.</p>
+
+<p><strong>#20</strong> - The <code>update</code> method that updates the position of the droid according to the time passed at a constant speed. It is extremely simple, it checkes both X and Y positions and if they are not the same as the target position, it updates the droid&rsquo;s respective position (X or Y) considering its speed. If the droid is in the target position, then the <code>move</code> state variable is updated completing the move action.</p>
+
+<p>This is not a very well written action, there is no collision checking on obstacles or enemies found along the way, no path finding. It just updates state.</p>
+
+<p><strong>#52</strong> - The <code>onClick(int x, int y)</code> method will be called when the &#8220;mouse up&#8221; event occurs. It checks if the clicked cell is empty and if so, then it starts the &#8220;move&#8221; action by setting the state variable to <code>true</code></p>
+
+<p><strong>#53-#54</strong> - Converts screen coordinates to world coordinates.</p>
+
+<p>This is the controller. To use it, the <code>GameEngine</code> needs to be updated.</p>
+
+<p>The updated <code>GameEngine.java</code></p>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 1 </span><span style="color: #007020; font-weight: bold">package</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.controller</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 2 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 3 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.Event</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 4 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">java.awt.Graphics</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 5 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 6 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model.Arena</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 7 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.model.Droid</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 8 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.view.Renderer</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 9 </span><span style="color: #007020; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">net.obviam.droids.view.SimpleArenaRenderer</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">10 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">11 </span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">GameEngine</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">12 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">13 </span>	<span style="color: #007020; font-weight: bold">private</span> Arena arena<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">14 </span>	<span style="color: #007020; font-weight: bold">private</span> Droid droid<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">15 </span>	<span style="color: #007020; font-weight: bold">private</span> Renderer renderer<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">16 </span><span style="background-color: #ffffcc">	<span style="color: #007020; font-weight: bold">private</span> ArenaController controller<span style="color: #666666">;</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">17 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">18 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">GameEngine</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">19 </span>		droid <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Droid<span style="color: #666666">();</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">20 </span>		<span style="color: #60a0b0; font-style: italic">// position droid in the middle</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">21 </span>		droid<span style="color: #666666">.</span><span style="color: #4070a0">setX</span><span style="color: #666666">(</span>Arena<span style="color: #666666">.</span><span style="color: #4070a0">WIDTH</span> <span style="color: #666666">/</span> <span style="color: #40a070">2</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">22 </span>		droid<span style="color: #666666">.</span><span style="color: #4070a0">setY</span><span style="color: #666666">(</span>Arena<span style="color: #666666">.</span><span style="color: #4070a0">HEIGHT</span> <span style="color: #666666">/</span> <span style="color: #40a070">2</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">23 </span>		arena <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Arena<span style="color: #666666">(</span>droid<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">24 </span>		
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">25 </span>		<span style="color: #60a0b0; font-style: italic">// setup renderer (view)</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">26 </span>		renderer <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> SimpleArenaRenderer<span style="color: #666666">(</span>arena<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">27 </span>		<span style="color: #60a0b0; font-style: italic">// setup controller</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">28 </span><span style="background-color: #ffffcc">		controller <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> ArenaController<span style="color: #666666">(</span>arena<span style="color: #666666">);</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">29 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">30 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">31 </span>	<span style="color: #60a0b0; font-style: italic">/** handle the Event passed from the main applet **/</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">32 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">boolean</span> <span style="color: #06287e">handleEvent</span><span style="color: #666666">(</span>Event e<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">33 </span>		<span style="color: #007020; font-weight: bold">switch</span> <span style="color: #666666">(</span>e<span style="color: #666666">.</span><span style="color: #4070a0">id</span><span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">34 </span>		<span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">KEY_PRESS</span><span style="color: #666666">:</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">35 </span>		<span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">KEY_ACTION</span><span style="color: #666666">:</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">36 </span>			<span style="color: #60a0b0; font-style: italic">// key pressed</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">37 </span>			<span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">38 </span>		<span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">KEY_RELEASE</span><span style="color: #666666">:</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">39 </span>			<span style="color: #60a0b0; font-style: italic">// key released</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">40 </span>			<span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">41 </span>		<span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">MOUSE_DOWN</span><span style="color: #666666">:</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">42 </span>			<span style="color: #60a0b0; font-style: italic">// mouse button pressed</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">43 </span>			<span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">44 </span>		<span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">MOUSE_UP</span><span style="color: #666666">:</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">45 </span>			<span style="color: #60a0b0; font-style: italic">// mouse button released</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">46 </span><span style="background-color: #ffffcc">			controller<span style="color: #666666">.</span><span style="color: #4070a0">onClick</span><span style="color: #666666">(</span>e<span style="color: #666666">.</span><span style="color: #4070a0">x</span><span style="color: #666666">,</span> e<span style="color: #666666">.</span><span style="color: #4070a0">y</span><span style="color: #666666">);</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">47 </span>			<span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">48 </span>		<span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">MOUSE_MOVE</span><span style="color: #666666">:</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">49 </span>			<span style="color: #60a0b0; font-style: italic">// mouse is being moved</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">50 </span>			<span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">51 </span>		<span style="color: #007020; font-weight: bold">case</span> Event<span style="color: #666666">.</span><span style="color: #4070a0">MOUSE_DRAG</span><span style="color: #666666">:</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">52 </span>			<span style="color: #60a0b0; font-style: italic">// mouse is being dragged (button pressed)</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">53 </span>			<span style="color: #007020; font-weight: bold">break</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">54 </span>		<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">55 </span>		<span style="color: #007020; font-weight: bold">return</span> <span style="color: #007020; font-weight: bold">false</span><span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">56 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">57 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">58 </span>	<span style="color: #60a0b0; font-style: italic">/** the update method with the deltaTime in seconds **/</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">59 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">update</span><span style="color: #666666">(</span><span style="color: #902000">float</span> deltaTime<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">60 </span><span style="background-color: #ffffcc">		controller<span style="color: #666666">.</span><span style="color: #4070a0">update</span><span style="color: #666666">(</span>deltaTime<span style="color: #666666">);</span>
+</span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px">61 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">62 </span>	
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">63 </span>	<span style="color: #60a0b0; font-style: italic">/** this will render the whole world **/</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">64 </span>	<span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">render</span><span style="color: #666666">(</span>Graphics g<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">65 </span>		renderer<span style="color: #666666">.</span><span style="color: #4070a0">render</span><span style="color: #666666">(</span>g<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">66 </span>	<span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">67 </span><span style="color: #666666">}</span>
+</pre></div>
+
+
+<p>The changes are highlighted.</p>
+
+<p><strong>#16</strong> - Declare the controller.</p>
+
+<p><strong>#28</strong> - Instantiate the controller.</p>
+
+<p><strong>#46</strong> - Delegating the mouse up event.</p>
+
+<p><strong>#60</strong> - Call the <code>update</code> method on the controller.</p>
+
+<p>Run the applet and you can click on the map and if the cell is empty, the droid will move there.</p>
+
+<h4 id="excercises">Excercises</h4>
+
+<ul>
+<li><p>Create a view that will display images/sprites for entities instead of the drawn shapes.</p>
+
+<p><em>Hint</em>: Use BufferedImage to achieve that.</p></li>
+
+<li><p>Extract the move action into a new class.</p></li>
+
+<li><p>Add new actions (attack) when an enemy is clicked</p>
+
+<p>_Hint:_Create a bullet entity that gets fired to the target. You can use the move action with a higher speed. When the <code>hitpoint</code> gets down to 0, then the enemy is destroyed. Use a different image to represent different states.</p></li>
+</ul>
+
+<h4 id="source-code">Source Code</h4>
+
+<p><em>Github link coming soon</em></p>
+            </div>
+            
+            <div class="post-comments">
+                
+            </div>
+            
+            <div class="push"></div>
+        </div>
+        <footer class="footer text-center">
+<p>Copyright &copy; 2017 obviam.net -
+<span class="credit">
+	Powered by 
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and 
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+    </body>

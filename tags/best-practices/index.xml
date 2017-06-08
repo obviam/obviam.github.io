@@ -923,7 +923,7 @@ Can&#39;t move.
 &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;####Let&amp;rsquo;s build some weapons&lt;/p&gt;
+&lt;h4 id=&#34;let-s-build-some-weapons&#34;&gt;Let&amp;rsquo;s build some weapons&lt;/h4&gt;
 
 &lt;p&gt;&lt;code&gt;NoWeapon.java&lt;/code&gt;&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/**&lt;/span&gt;
@@ -1005,7 +1005,7 @@ Can&#39;t move.
 
 &lt;p&gt;You might notice the &lt;code&gt;Vector2f&lt;/code&gt; class. This is a very basic 2D vector class which currently holds the x and y coordinates. Nothing more. You can find it in the downloaded source.&lt;/p&gt;
 
-&lt;p&gt;####Let&amp;rsquo;s build some chassis&lt;/p&gt;
+&lt;h4 id=&#34;let-s-build-some-chassis&#34;&gt;Let&amp;rsquo;s build some chassis&lt;/h4&gt;
 
 &lt;p&gt;The &lt;code&gt;getDescription()&lt;/code&gt; method says what the chassis is like.&lt;/p&gt;
 

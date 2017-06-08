@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title> Introduction to 3D Programming with Android - Perspective Projections &middot; Obviam - Game Development Tutorials and Musings in Software Development </title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.13" />
+
+
+<script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://obviam.github.io/css/nix.css">
+
+ 
+<link href="https://fonts.googleapis.com/css?family=Inconsolata|Open+Sans|Roboto|Montserrat|Concert+One|Source+Code+Pro:400,700" rel="stylesheet">
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-17403436-1', 'auto');
+	  ga('send', 'pageview');
+
+</script>
+
+
+    </head>
+
+    <body>
+        <header>
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse font-header">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" id="green-terminal" href=https://obviam.github.io/>impaler@obviam.net ~ $</a>
+		</div>
+
+		
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a href="https://obviam.github.io/">/home/impaler</a>
+				</li>
+				
+				
+				<li >
+					<a href="/blog-tmp">~/blog</a>
+				</li>
+				
+				
+				<li >
+					<a href="/plan">~/.plan</a>
+				</li>
+				
+				
+				<li >
+					<a href="/archive">~/archive</a>
+				</li>
+				
+				
+				<li >
+					<a href="/about">~/about</a>
+				</li>
+				
+
+			</ul>
+		</div>
+	</div>
+</nav>
+</header>
+
+        <div class="container wrapper">
+            <h1><a href="https://obviam.github.io/archive/3d-programming-with-android-projections-perspective/">Introduction to 3D Programming with Android - Perspective Projections</a></h1>
+            <span class="post-date">Jun 8, 2011 </span>
+            <div class="post-content">
+                <p>Adding depth to our games, then we have to get ready to go 3D. 3D is not complicated at all and rendering 3D graphics is quite easy using OpenGL ES.</p>
+
+<p>I will break the concepts down to the basics. In a 3D game, as in the real world, everything happens in space. If we were watching a football match from the tribunes, looking down onto the pitch, we would be observing the unfolding action from a perspective. What we would see is defined by the field of view and the players that we &#8220;catch&#8221; with our eye. We would look at a 3D scene.</p>
+
+<p></p>
+
+<p>There are a few notions to get acquainted to before we can do real 3D programming.</p>
+
+<p>Take a look at the following diagram. It shows a 3D scene.</p>
+
+<p><img src="/images/archive/2011/06/graphics_fundamentals_viewport_3dscene.png" alt="3D Scene" /></p>
+
+<p>The above 3D scene consists of the following elements:</p>
+
+<ul>
+<li><strong>Obeserver - the focal point</strong> - this is where we stand to observe the scene. It is represented by the eye on the diagram.</li>
+<li><strong>View Frustum</strong> - this is a pyramid which has 2 <strong>clipping planes</strong>. Objects or parts of objects found outside the frustum, won&rsquo;t be rendered.
+
+<ul>
+<li><strong>Viewport</strong> - is a rectangular plane where all the objects found in the view frustum are projected.</li>
+<li><strong>Field of View</strong> - The angle on the Y axis for the extent of the observable world.</ul>
+The viewport is usually the near clipping plane. It is not possible to define a clipping plane closer than the viewport to the observer.
+<br /></li>
+</ul></li>
+</ul>
+
+<p>Everything you see in the 3D scene makes up the <strong>perspective</strong>. Perspective projection scales the final image of the objects according to their distance from the observation point. The farther an object is, the smaller it appears, just like in real life.</p>
+
+<p>This is much like a camera. Let&rsquo;s see how to implement this. We will use triangles in space.</p>
+
+<p>Let&rsquo;s create an activity with an OpenGL renderer.</p>
+
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 1 </span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">MainActivity</span> <span style="color: #007020; font-weight: bold">extends</span> Activity <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 2 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 3 </span>  <span style="color: #007020; font-weight: bold">private</span> GLSurfaceView   glView<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 4 </span>  <span style="color: #007020; font-weight: bold">private</span> Triangle    triangle1<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 5 </span>  <span style="color: #007020; font-weight: bold">private</span> Triangle    triangle2<span style="color: #666666">;</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 6 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 7 </span>  <span style="color: #60a0b0; font-style: italic">/** Called when the activity is first created. */</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 8 </span>    <span style="color: #555555; font-weight: bold">@Override</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px"> 9 </span>    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">onCreate</span><span style="color: #666666">(</span>Bundle savedInstanceState<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">10 </span>        <span style="color: #007020; font-weight: bold">super</span><span style="color: #666666">.</span><span style="color: #4070a0">onCreate</span><span style="color: #666666">(</span>savedInstanceState<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">11 </span>    requestWindowFeature<span style="color: #666666">(</span>Window<span style="color: #666666">.</span><span style="color: #4070a0">FEATURE_NO_TITLE</span><span style="color: #666666">);</span>          
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">12 </span>    getWindow<span style="color: #666666">().</span><span style="color: #4070a0">setFlags</span><span style="color: #666666">(</span>WindowManager<span style="color: #666666">.</span><span style="color: #4070a0">LayoutParams</span><span style="color: #666666">.</span><span style="color: #4070a0">FLAG_FULLSCREEN</span><span style="color: #666666">,</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">13 </span>        WindowManager<span style="color: #666666">.</span><span style="color: #4070a0">LayoutParams</span><span style="color: #666666">.</span><span style="color: #4070a0">FLAG_FULLSCREEN</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">14 </span>    glView <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> GLSurfaceView<span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">);</span>                
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">15 </span>    glView<span style="color: #666666">.</span><span style="color: #4070a0">setRenderer</span><span style="color: #666666">(</span><span style="color: #007020; font-weight: bold">new</span> MyOpenGLRenderer<span style="color: #666666">());</span>            
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">16 </span>        setContentView<span style="color: #666666">(</span>glView<span style="color: #666666">);</span>                      
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">17 </span>    <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">18 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">19 </span>    <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">MyOpenGLRenderer</span> <span style="color: #007020; font-weight: bold">implements</span> Renderer <span style="color: #666666">{</span>            
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">20 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">21 </span>      <span style="color: #555555; font-weight: bold">@Override</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">22 </span>      <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">onSurfaceChanged</span><span style="color: #666666">(</span>GL10 gl<span style="color: #666666">,</span> <span style="color: #902000">int</span> width<span style="color: #666666">,</span> <span style="color: #902000">int</span> height<span style="color: #666666">)</span> <span style="color: #666666">{</span> 
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">23 </span>        Log<span style="color: #666666">.</span><span style="color: #4070a0">d</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;MyOpenGLRenderer&quot;</span><span style="color: #666666">,</span> <span style="color: #4070a0">&quot;Surface changed. Width=&quot;</span> <span style="color: #666666">+</span> width
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">24 </span>            <span style="color: #666666">+</span> <span style="color: #4070a0">&quot; Height=&quot;</span> <span style="color: #666666">+</span> height<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">25 </span>        triangle1 <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Triangle<span style="color: #666666">(</span><span style="color: #40a070">0.5f</span><span style="color: #666666">,</span> <span style="color: #40a070">1</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">26 </span>        triangle2 <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> Triangle<span style="color: #666666">(</span><span style="color: #40a070">0.5f</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">1</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">27 </span>        gl<span style="color: #666666">.</span><span style="color: #4070a0">glViewport</span><span style="color: #666666">(</span><span style="color: #40a070">0</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> width<span style="color: #666666">,</span> height<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">28 </span>        gl<span style="color: #666666">.</span><span style="color: #4070a0">glMatrixMode</span><span style="color: #666666">(</span>GL10<span style="color: #666666">.</span><span style="color: #4070a0">GL_PROJECTION</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">29 </span>        gl<span style="color: #666666">.</span><span style="color: #4070a0">glLoadIdentity</span><span style="color: #666666">();</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">30 </span>      GLU<span style="color: #666666">.</span><span style="color: #4070a0">gluPerspective</span><span style="color: #666666">(</span>gl<span style="color: #666666">,</span> <span style="color: #40a070">45.0f</span><span style="color: #666666">,</span> <span style="color: #666666">(</span><span style="color: #902000">float</span><span style="color: #666666">)</span> width <span style="color: #666666">/</span> <span style="color: #666666">(</span><span style="color: #902000">float</span><span style="color: #666666">)</span> height<span style="color: #666666">,</span> 
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">31 </span>          <span style="color: #40a070">0.1f</span><span style="color: #666666">,</span> <span style="color: #40a070">100.0f</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">32 </span>      gl<span style="color: #666666">.</span><span style="color: #4070a0">glMatrixMode</span><span style="color: #666666">(</span>GL10<span style="color: #666666">.</span><span style="color: #4070a0">GL_MODELVIEW</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">33 </span>      gl<span style="color: #666666">.</span><span style="color: #4070a0">glLoadIdentity</span><span style="color: #666666">();</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">34 </span>      <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">35 </span>      
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">36 </span>      <span style="color: #555555; font-weight: bold">@Override</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">37 </span>      <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">onSurfaceCreated</span><span style="color: #666666">(</span>GL10 gl<span style="color: #666666">,</span> EGLConfig config<span style="color: #666666">)</span> <span style="color: #666666">{</span>  
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">38 </span>        Log<span style="color: #666666">.</span><span style="color: #4070a0">d</span><span style="color: #666666">(</span><span style="color: #4070a0">&quot;MyOpenGLRenderer&quot;</span><span style="color: #666666">,</span> <span style="color: #4070a0">&quot;Surface created&quot;</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">39 </span>      <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">40 </span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">41 </span>      <span style="color: #555555; font-weight: bold">@Override</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">42 </span>    <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">onDrawFrame</span><span style="color: #666666">(</span>GL10 gl<span style="color: #666666">)</span> <span style="color: #666666">{</span>                
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">43 </span>      gl<span style="color: #666666">.</span><span style="color: #4070a0">glClearColor</span><span style="color: #666666">(</span><span style="color: #40a070">0.0f</span><span style="color: #666666">,</span> <span style="color: #40a070">0.0f</span><span style="color: #666666">,</span> <span style="color: #40a070">0.0f</span><span style="color: #666666">,</span> <span style="color: #40a070">1f</span><span style="color: #666666">);</span>            
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">44 </span>      gl<span style="color: #666666">.</span><span style="color: #4070a0">glClear</span><span style="color: #666666">(</span>GL10<span style="color: #666666">.</span><span style="color: #4070a0">GL_COLOR_BUFFER_BIT</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">45 </span>      gl<span style="color: #666666">.</span><span style="color: #4070a0">glLoadIdentity</span><span style="color: #666666">();</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">46 </span>      gl<span style="color: #666666">.</span><span style="color: #4070a0">glTranslatef</span><span style="color: #666666">(</span><span style="color: #40a070">0.0f</span><span style="color: #666666">,</span> <span style="color: #40a070">0.0f</span><span style="color: #666666">,</span> <span style="color: #666666">-</span><span style="color: #40a070">5.0f</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">47 </span>      triangle1<span style="color: #666666">.</span><span style="color: #4070a0">draw</span><span style="color: #666666">(</span>gl<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">48 </span>      gl<span style="color: #666666">.</span><span style="color: #4070a0">glTranslatef</span><span style="color: #666666">(</span><span style="color: #40a070">2.0f</span><span style="color: #666666">,</span> <span style="color: #40a070">0.0f</span><span style="color: #666666">,</span> <span style="color: #666666">-</span><span style="color: #40a070">5.0f</span><span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">49 </span>      triangle2<span style="color: #666666">.</span><span style="color: #4070a0">draw</span><span style="color: #666666">(</span>gl<span style="color: #666666">);</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">50 </span>    <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">51 </span>    <span style="color: #666666">}</span>
+<span style="background-color: #f0f0f0; padding: 0 5px 0 5px">52 </span><span style="color: #666666">}</span>
+</pre></div>
+
+
+<p>The <code>MainActivity</code> will display two triangles with the same size at different positions. These are <code>triangle1</code> and <code>triangle2</code> defined in lines <strong>#4</strong> and <strong>#5</strong>.</p>
+
+<p>The activity&rsquo;s <code>onCreate</code> method is straightforward but let&rsquo;s have a recap line by line:</p>
+
+<p><strong>#10</strong> - Call the cunstructor of the super class to handle state.</p>
+
+<p><strong>#11</strong> - Get rid of the window title.</p>
+
+<p><strong>#12</strong> - Makes the window go full-screen.</p>
+
+<p><strong>#14</strong> - Instantiates the <code>GLSurfaceView</code> to access the OpenGL ES API. It is declared as a private member at <strong>#03</strong> because we need to use it later on.</p>
+
+<p><strong>#15</strong> - Creates a new instance of our own OpenGL renderer (defined as an inner class at line <strong>#19</strong>), and sets it to be the renderer of the newly created view.</p>
+
+<p><strong>#16</strong> - Sets the newly created view to be the view of the activity.</p>
+
+<p>The setup is done, let&rsquo;s move on to the renderer. As you have noticed, we created an inner class <code>MyOpenGLRenderer</code> which implements the <code>Renderer</code> interface. It has 3 methods and these methods are triggered by events from the activity:</p>
+
+<ul>
+<li><code>onSurfaceCreated</code> is called every time the drawing surface is created. This can happen when the application starts, or when it becomes active after being sent to the background or when the orientation changes. Note that all these events are triggered after a context loss, so every asset (think loaded images) will be lost and have to be recreated. This is the place where all assets and application objects should be (re)created.</li>
+<li><code>onSurfaceChanged</code>occurs when the screen size changes. This can happen when the device’s orientation changes.</li>
+<li><code>onDrawFrame</code> is where the actual drawing happens. It is triggered continuously after every successful draw.</li>
+</ul>
+
+<p>All life-cycle events get passed a GL10 instance through which we can issue commands to OpenGL ES.</p>
+
+<p>We do all our initialisation in the <code>onSurfaceChanged</code>.</p>
+
+<p><strong>#25</strong> - Instantiates <code>triangle1</code> with a red colour and size 0.5.</p>
+
+<p><strong>#26</strong> - Instantiates <code>triangle2</code> with a green colour and the same size as <code>triangle1</code>.</p>
+
+<p><strong>#27</strong> - Sets the actual viewport. The first two parameters define the lower left corner, while the next 2 the width and height of it. Width and height in this case is set with values passed by Android&rsquo;s <code>onSurfaceChanged</code> event. If orientation is not locked, the width and height will swap values every time the surface changes between portrait and landscape.</p>
+
+<p><strong>#28</strong> - Sets the active matrix to be the projection matrix. OpenGL is a state machine and it has 4 internal matrices to work with. It will be discussed in detail, but for now this is how we tell OpenGL to switch to the perspective matrix so we can perform operations on it.</p>
+
+<p><strong>#29</strong> - This is an operation on the active matrix, which is the projection one. It resets it.</p>
+
+<p><strong>#30</strong> - This line sets up the perspective projection. It uses the GLU utiliy provided by Android and it provides convenience methods for common operations. The first parameter is the GL surface, the second parameter is the field of view (fov). The field of view is expressed in degrees and represents the angle on the Y axis. It is the opening of the frustum on the Y axis. The closer the observer is to the viewport, the more it can see &#8220;through&#8221; it.</p>
+
+<p>The 3rd parameter is the aspect ratio and it is width/height ratio. Think of a TV set (16:9).</p>
+
+<p>The 4th parameter defines the near clipping plane and it is always a positive value.</p>
+
+<p>The 5th and last parameter is the far clipping plane. Everything after this plane won’t be rendered.</p>
+
+<p><strong>#32</strong> - Sets the active matrix to be the model view matrix. Every command sent to OpenGL or operation</p>
+
+<p>performed, will affect this matrix. This matrix affects the scene and the objects in it.</p>
+
+<p><strong>#33</strong> - Resets the model view matrix.</p>
+
+<p>In the <code>onDrawFrame</code> we simply issue a series of commands to draw the scene.</p>
+
+<p><strong>#43</strong> - Sets the clear values for the colour buffer to opaque black. The attributes are (red, green, blue, alpha) taking values between 0 and 1. 1 being the highest intensity while 0 meaning &#8220;no&#8221; intensity. For the alpha component 0 is transparent and 1 is opaque.</p>
+
+<p><strong>#44</strong> - Issue the command to clear the colour buffer, thus the screen.</p>
+
+<p><strong>#45</strong> - Resets the current matrix which is the model view from the <code>onSurfaceChange</code>.</p>
+
+<p><strong>#46</strong> - We issue a command that creates a translation in the model view matrix. The first parameters says how much to translate on the X axis, the second on the Y axis and the third on the Z axis. As we set up the viewport, X points RIGHT, Y points UP and Z points TOWARDS US out of the screen. So by translating with -5, we tell OpenGL to move INTO the screen 5 units.</p>
+
+<p>Note that OpenGL does not work with pixels as measures, but with units and fractions of units. We will have to decide how many units an object will have. For example 1 unit in OpenGL can be 1 meter in the real world, so a human can be 1.8 unit tall.</p>
+
+<p><strong>#47</strong> - Draw <code>triangle1</code>. It will be drawn 5 units into the screen.</p>
+
+<p><strong>#48</strong> - We instruct OpenGL to move further 5 units INTO the screen (meaning farther) and 2 units to the right. The translation will be made FROM the last position.</p>
+
+<p><strong>#49</strong> - Draw the second triangle (the green one).</p>
+
+<p>The result will show the scaling of the triangles. The green triangle is the same size as the red one but it appears smaller because it is farther away.</p>
+
+<p><img src="/images/archive/2011/06/perspective_projection.png" alt="Perspective Projection" /></p>
+
+<p>When doing <strong>orthographic projection</strong>, the Z component is completely ignored and there is no scaling effect.</p>
+
+<p>The following listing shows the <code>Triangle</code> used, but you don&rsquo;t have to worry about understanding it, as I will cover the vertex buffers shortly.</p>
+<div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Triangle</span> <span style="color: #666666">{</span>
+
+  <span style="color: #007020; font-weight: bold">private</span> FloatBuffer vertexBuffer<span style="color: #666666">;</span>
+  <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> base <span style="color: #666666">=</span> <span style="color: #40a070">1.0f</span><span style="color: #666666">;</span>
+  <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> red<span style="color: #666666">,</span> green<span style="color: #666666">,</span> blue<span style="color: #666666">;</span>
+  <span style="color: #007020; font-weight: bold">private</span> <span style="color: #902000">float</span> vertices<span style="color: #666666">[]</span> <span style="color: #666666">=</span> <span style="color: #666666">{</span>
+        <span style="color: #666666">-</span><span style="color: #40a070">0.5f</span><span style="color: #666666">,</span> <span style="color: #666666">-</span><span style="color: #40a070">0.5f</span><span style="color: #666666">,</span> <span style="color: #40a070">0.0f</span><span style="color: #666666">,</span>        <span style="color: #60a0b0; font-style: italic">// V1 - first vertex (x,y,z)</span>
+           <span style="color: #40a070">0.5f</span><span style="color: #666666">,</span> <span style="color: #666666">-</span><span style="color: #40a070">0.5f</span><span style="color: #666666">,</span> <span style="color: #40a070">0.0f</span><span style="color: #666666">,</span>        <span style="color: #60a0b0; font-style: italic">// V2 - second vertex</span>
+           <span style="color: #40a070">0.0f</span><span style="color: #666666">,</span>  <span style="color: #40a070">0.5f</span><span style="color: #666666">,</span> <span style="color: #40a070">0.0f</span>         <span style="color: #60a0b0; font-style: italic">// V3 - third vertex</span>
+  <span style="color: #666666">};</span>
+  
+  <span style="color: #007020; font-weight: bold">public</span> <span style="color: #06287e">Triangle</span><span style="color: #666666">(</span><span style="color: #902000">float</span> scale<span style="color: #666666">,</span> <span style="color: #902000">float</span> red<span style="color: #666666">,</span> <span style="color: #902000">float</span> green<span style="color: #666666">,</span> <span style="color: #902000">float</span> blue<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+    vertices <span style="color: #666666">=</span> <span style="color: #007020; font-weight: bold">new</span> <span style="color: #902000">float</span><span style="color: #666666">[]</span> <span style="color: #666666">{</span>
+            <span style="color: #666666">-</span>base <span style="color: #666666">*</span> scale<span style="color: #666666">,</span> <span style="color: #666666">-</span>base <span style="color: #666666">*</span> scale<span style="color: #666666">,</span> <span style="color: #40a070">0.0f</span><span style="color: #666666">,</span> <span style="color: #60a0b0; font-style: italic">// V1 - first vertex</span>
+             base <span style="color: #666666">*</span> scale<span style="color: #666666">,</span> <span style="color: #666666">-</span>base <span style="color: #666666">*</span> scale<span style="color: #666666">,</span> <span style="color: #40a070">0.0f</span><span style="color: #666666">,</span> <span style="color: #60a0b0; font-style: italic">// V2 - second vertex</span>
+               <span style="color: #40a070">0.0f</span><span style="color: #666666">,</span>  base <span style="color: #666666">*</span> scale<span style="color: #666666">,</span> <span style="color: #40a070">0.0f</span>          <span style="color: #60a0b0; font-style: italic">// V3 - third vertex</span>
+      <span style="color: #666666">};</span>
+    <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">red</span> <span style="color: #666666">=</span> red<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">green</span> <span style="color: #666666">=</span> green<span style="color: #666666">;</span>
+    <span style="color: #007020; font-weight: bold">this</span><span style="color: #666666">.</span><span style="color: #4070a0">blue</span> <span style="color: #666666">=</span> blue<span style="color: #666666">;</span>
+    ByteBuffer byteBuffer <span style="color: #666666">=</span> ByteBuffer<span style="color: #666666">.</span><span style="color: #4070a0">allocateDirect</span><span style="color: #666666">(</span><span style="color: #40a070">3</span> <span style="color: #666666">*</span> <span style="color: #40a070">3</span> <span style="color: #666666">*</span> <span style="color: #40a070">4</span><span style="color: #666666">);</span>
+    byteBuffer<span style="color: #666666">.</span><span style="color: #4070a0">order</span><span style="color: #666666">(</span>ByteOrder<span style="color: #666666">.</span><span style="color: #4070a0">nativeOrder</span><span style="color: #666666">());</span>
+    vertexBuffer <span style="color: #666666">=</span> byteBuffer<span style="color: #666666">.</span><span style="color: #4070a0">asFloatBuffer</span><span style="color: #666666">();</span>
+    vertexBuffer<span style="color: #666666">.</span><span style="color: #4070a0">put</span><span style="color: #666666">(</span>vertices<span style="color: #666666">);</span>
+    vertexBuffer<span style="color: #666666">.</span><span style="color: #4070a0">flip</span><span style="color: #666666">();</span>
+  <span style="color: #666666">}</span>
+  
+  <span style="color: #007020; font-weight: bold">public</span> <span style="color: #902000">void</span> <span style="color: #06287e">draw</span><span style="color: #666666">(</span>GL10 gl<span style="color: #666666">)</span> <span style="color: #666666">{</span>
+    gl<span style="color: #666666">.</span><span style="color: #4070a0">glEnableClientState</span><span style="color: #666666">(</span>GL10<span style="color: #666666">.</span><span style="color: #4070a0">GL_VERTEX_ARRAY</span><span style="color: #666666">);</span>
+    <span style="color: #60a0b0; font-style: italic">// set the colour for the triangle</span>
+    gl<span style="color: #666666">.</span><span style="color: #4070a0">glColor4f</span><span style="color: #666666">(</span>red<span style="color: #666666">,</span> green<span style="color: #666666">,</span> blue<span style="color: #666666">,</span> <span style="color: #40a070">0.5f</span><span style="color: #666666">);</span>
+    <span style="color: #60a0b0; font-style: italic">// Point to our vertex buffer</span>
+    gl<span style="color: #666666">.</span><span style="color: #4070a0">glVertexPointer</span><span style="color: #666666">(</span><span style="color: #40a070">3</span><span style="color: #666666">,</span> GL10<span style="color: #666666">.</span><span style="color: #4070a0">GL_FLOAT</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> vertexBuffer<span style="color: #666666">);</span>
+    <span style="color: #60a0b0; font-style: italic">// Draw the vertices as triangle strip</span>
+    gl<span style="color: #666666">.</span><span style="color: #4070a0">glDrawArrays</span><span style="color: #666666">(</span>GL10<span style="color: #666666">.</span><span style="color: #4070a0">GL_TRIANGLES</span><span style="color: #666666">,</span> <span style="color: #40a070">0</span><span style="color: #666666">,</span> vertices<span style="color: #666666">.</span><span style="color: #4070a0">length</span> <span style="color: #666666">/</span> <span style="color: #40a070">3</span><span style="color: #666666">);</span>
+    <span style="color: #60a0b0; font-style: italic">// Disable the client state before leaving</span>
+    gl<span style="color: #666666">.</span><span style="color: #4070a0">glDisableClientState</span><span style="color: #666666">(</span>GL10<span style="color: #666666">.</span><span style="color: #4070a0">GL_VERTEX_ARRAY</span><span style="color: #666666">);</span>
+  <span style="color: #666666">}</span>
+<span style="color: #666666">}</span>
+</pre></div>
+            </div>
+            
+            <div class="post-comments">
+                
+            </div>
+            
+            <div class="push"></div>
+        </div>
+        <footer class="footer text-center">
+<p>Copyright &copy; 2017 obviam.net -
+<span class="credit">
+	Powered by 
+	<a target="_blank" href="https://gohugo.io">Hugo</a>
+	and 
+	<a target="_blank" href="https://github.com/LordMathis/hugo-theme-nix/">Nix</a> theme.
+</span>
+</p>
+</footer>
+
+    </body>

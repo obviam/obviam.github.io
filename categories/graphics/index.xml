@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Graphics on Obviam - Game Development Tutorials and Musings in Software Development</title>
+    <link>https://obviam.github.io/categories/graphics/index.xml</link>
+    <description>Recent content in Graphics on Obviam - Game Development Tutorials and Musings in Software Development</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="https://obviam.github.io/categories/graphics/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Introduction to 3D Programming with Android - Perspective Projections</title>
+      <link>https://obviam.github.io/archive/3d-programming-with-android-projections-perspective/</link>
+      <pubDate>Wed, 08 Jun 2011 17:04:56 +0000</pubDate>
+      
+      <guid>https://obviam.github.io/archive/3d-programming-with-android-projections-perspective/</guid>
+      <description>&lt;p&gt;Adding depth to our games, then we have to get ready to go 3D. 3D is not complicated at all and rendering 3D graphics is quite easy using OpenGL ES.&lt;/p&gt;
+
+&lt;p&gt;I will break the concepts down to the basics. In a 3D game, as in the real world, everything happens in space. If we were watching a football match from the tribunes, looking down onto the pitch, we would be observing the unfolding action from a perspective. What we would see is defined by the field of view and the players that we &amp;#8220;catch&amp;#8221; with our eye. We would look at a 3D scene.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;There are a few notions to get acquainted to before we can do real 3D programming.&lt;/p&gt;
+
+&lt;p&gt;Take a look at the following diagram. It shows a 3D scene.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://obviam.github.io/images/archive/2011/06/graphics_fundamentals_viewport_3dscene.png&#34; alt=&#34;3D Scene&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The above 3D scene consists of the following elements:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Obeserver - the focal point&lt;/strong&gt; - this is where we stand to observe the scene. It is represented by the eye on the diagram.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;View Frustum&lt;/strong&gt; - this is a pyramid which has 2 &lt;strong&gt;clipping planes&lt;/strong&gt;. Objects or parts of objects found outside the frustum, won&amp;rsquo;t be rendered.
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Viewport&lt;/strong&gt; - is a rectangular plane where all the objects found in the view frustum are projected.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Field of View&lt;/strong&gt; - The angle on the Y axis for the extent of the observable world.&lt;/ul&gt;
+The viewport is usually the near clipping plane. It is not possible to define a clipping plane closer than the viewport to the observer.
+&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Everything you see in the 3D scene makes up the &lt;strong&gt;perspective&lt;/strong&gt;. Perspective projection scales the final image of the objects according to their distance from the observation point. The farther an object is, the smaller it appears, just like in real life.&lt;/p&gt;
+
+&lt;p&gt;This is much like a camera. Let&amp;rsquo;s see how to implement this. We will use triangles in space.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create an activity with an OpenGL renderer.&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt; 1 &lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;MainActivity&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;extends&lt;/span&gt; Activity &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt; 2 &lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt; 3 &lt;/span&gt;  &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; GLSurfaceView   glView&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt; 4 &lt;/span&gt;  &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; Triangle    triangle1&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt; 5 &lt;/span&gt;  &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; Triangle    triangle2&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt; 6 &lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt; 7 &lt;/span&gt;  &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;/** Called when the activity is first created. */&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt; 8 &lt;/span&gt;    &lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt; 9 &lt;/span&gt;    &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;onCreate&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;Bundle savedInstanceState&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;10 &lt;/span&gt;        &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;super&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;onCreate&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;savedInstanceState&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;11 &lt;/span&gt;    requestWindowFeature&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;Window&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;FEATURE_NO_TITLE&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;          
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;12 &lt;/span&gt;    getWindow&lt;span style=&#34;color: #666666&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;setFlags&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;WindowManager&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;LayoutParams&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;FLAG_FULLSCREEN&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;13 &lt;/span&gt;        WindowManager&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;LayoutParams&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;FLAG_FULLSCREEN&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;14 &lt;/span&gt;    glView &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; GLSurfaceView&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;                
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;15 &lt;/span&gt;    glView&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;setRenderer&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; MyOpenGLRenderer&lt;span style=&#34;color: #666666&#34;&gt;());&lt;/span&gt;            
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;16 &lt;/span&gt;        setContentView&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;glView&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;                      
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;17 &lt;/span&gt;    &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;18 &lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;19 &lt;/span&gt;    &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;MyOpenGLRenderer&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;implements&lt;/span&gt; Renderer &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;            
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;20 &lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;21 &lt;/span&gt;      &lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;22 &lt;/span&gt;      &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;onSurfaceChanged&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;GL10 gl&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; width&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;int&lt;/span&gt; height&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt; 
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;23 &lt;/span&gt;        Log&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;d&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;MyOpenGLRenderer&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Surface changed. Width=&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; width
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;24 &lt;/span&gt;            &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot; Height=&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;+&lt;/span&gt; height&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;25 &lt;/span&gt;        triangle1 &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; Triangle&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;0.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;26 &lt;/span&gt;        triangle2 &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; Triangle&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;0.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;27 &lt;/span&gt;        gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glViewport&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; width&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; height&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;28 &lt;/span&gt;        gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glMatrixMode&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;GL10&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;GL_PROJECTION&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;29 &lt;/span&gt;        gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glLoadIdentity&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;30 &lt;/span&gt;      GLU&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;gluPerspective&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;gl&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;45.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; width &lt;span style=&#34;color: #666666&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; height&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; 
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;31 &lt;/span&gt;          &lt;span style=&#34;color: #40a070&#34;&gt;0.1f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;100.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;32 &lt;/span&gt;      gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glMatrixMode&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;GL10&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;GL_MODELVIEW&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;33 &lt;/span&gt;      gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glLoadIdentity&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;34 &lt;/span&gt;      &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;35 &lt;/span&gt;      
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;36 &lt;/span&gt;      &lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;37 &lt;/span&gt;      &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;onSurfaceCreated&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;GL10 gl&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; EGLConfig config&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;  
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;38 &lt;/span&gt;        Log&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;d&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;MyOpenGLRenderer&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #4070a0&#34;&gt;&amp;quot;Surface created&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;39 &lt;/span&gt;      &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;40 &lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;41 &lt;/span&gt;      &lt;span style=&#34;color: #555555; font-weight: bold&#34;&gt;@Override&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;42 &lt;/span&gt;    &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;onDrawFrame&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;GL10 gl&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;                
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;43 &lt;/span&gt;      gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glClearColor&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;            
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;44 &lt;/span&gt;      gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glClear&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;GL10&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;GL_COLOR_BUFFER_BIT&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;45 &lt;/span&gt;      gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glLoadIdentity&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;46 &lt;/span&gt;      gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glTranslatef&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;5.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;47 &lt;/span&gt;      triangle1&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;draw&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;gl&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;48 &lt;/span&gt;      gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glTranslatef&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;2.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;5.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;49 &lt;/span&gt;      triangle2&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;draw&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;gl&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;50 &lt;/span&gt;    &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;51 &lt;/span&gt;    &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;background-color: #f0f0f0; padding: 0 5px 0 5px&#34;&gt;52 &lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The &lt;code&gt;MainActivity&lt;/code&gt; will display two triangles with the same size at different positions. These are &lt;code&gt;triangle1&lt;/code&gt; and &lt;code&gt;triangle2&lt;/code&gt; defined in lines &lt;strong&gt;#4&lt;/strong&gt; and &lt;strong&gt;#5&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;The activity&amp;rsquo;s &lt;code&gt;onCreate&lt;/code&gt; method is straightforward but let&amp;rsquo;s have a recap line by line:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#10&lt;/strong&gt; - Call the cunstructor of the super class to handle state.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#11&lt;/strong&gt; - Get rid of the window title.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#12&lt;/strong&gt; - Makes the window go full-screen.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#14&lt;/strong&gt; - Instantiates the &lt;code&gt;GLSurfaceView&lt;/code&gt; to access the OpenGL ES API. It is declared as a private member at &lt;strong&gt;#03&lt;/strong&gt; because we need to use it later on.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#15&lt;/strong&gt; - Creates a new instance of our own OpenGL renderer (defined as an inner class at line &lt;strong&gt;#19&lt;/strong&gt;), and sets it to be the renderer of the newly created view.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#16&lt;/strong&gt; - Sets the newly created view to be the view of the activity.&lt;/p&gt;
+
+&lt;p&gt;The setup is done, let&amp;rsquo;s move on to the renderer. As you have noticed, we created an inner class &lt;code&gt;MyOpenGLRenderer&lt;/code&gt; which implements the &lt;code&gt;Renderer&lt;/code&gt; interface. It has 3 methods and these methods are triggered by events from the activity:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;onSurfaceCreated&lt;/code&gt; is called every time the drawing surface is created. This can happen when the application starts, or when it becomes active after being sent to the background or when the orientation changes. Note that all these events are triggered after a context loss, so every asset (think loaded images) will be lost and have to be recreated. This is the place where all assets and application objects should be (re)created.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;onSurfaceChanged&lt;/code&gt;occurs when the screen size changes. This can happen when the device’s orientation changes.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;onDrawFrame&lt;/code&gt; is where the actual drawing happens. It is triggered continuously after every successful draw.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;All life-cycle events get passed a GL10 instance through which we can issue commands to OpenGL ES.&lt;/p&gt;
+
+&lt;p&gt;We do all our initialisation in the &lt;code&gt;onSurfaceChanged&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#25&lt;/strong&gt; - Instantiates &lt;code&gt;triangle1&lt;/code&gt; with a red colour and size 0.5.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#26&lt;/strong&gt; - Instantiates &lt;code&gt;triangle2&lt;/code&gt; with a green colour and the same size as &lt;code&gt;triangle1&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#27&lt;/strong&gt; - Sets the actual viewport. The first two parameters define the lower left corner, while the next 2 the width and height of it. Width and height in this case is set with values passed by Android&amp;rsquo;s &lt;code&gt;onSurfaceChanged&lt;/code&gt; event. If orientation is not locked, the width and height will swap values every time the surface changes between portrait and landscape.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#28&lt;/strong&gt; - Sets the active matrix to be the projection matrix. OpenGL is a state machine and it has 4 internal matrices to work with. It will be discussed in detail, but for now this is how we tell OpenGL to switch to the perspective matrix so we can perform operations on it.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#29&lt;/strong&gt; - This is an operation on the active matrix, which is the projection one. It resets it.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#30&lt;/strong&gt; - This line sets up the perspective projection. It uses the GLU utiliy provided by Android and it provides convenience methods for common operations. The first parameter is the GL surface, the second parameter is the field of view (fov). The field of view is expressed in degrees and represents the angle on the Y axis. It is the opening of the frustum on the Y axis. The closer the observer is to the viewport, the more it can see &amp;#8220;through&amp;#8221; it.&lt;/p&gt;
+
+&lt;p&gt;The 3rd parameter is the aspect ratio and it is width/height ratio. Think of a TV set (16:9).&lt;/p&gt;
+
+&lt;p&gt;The 4th parameter defines the near clipping plane and it is always a positive value.&lt;/p&gt;
+
+&lt;p&gt;The 5th and last parameter is the far clipping plane. Everything after this plane won’t be rendered.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#32&lt;/strong&gt; - Sets the active matrix to be the model view matrix. Every command sent to OpenGL or operation&lt;/p&gt;
+
+&lt;p&gt;performed, will affect this matrix. This matrix affects the scene and the objects in it.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#33&lt;/strong&gt; - Resets the model view matrix.&lt;/p&gt;
+
+&lt;p&gt;In the &lt;code&gt;onDrawFrame&lt;/code&gt; we simply issue a series of commands to draw the scene.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#43&lt;/strong&gt; - Sets the clear values for the colour buffer to opaque black. The attributes are (red, green, blue, alpha) taking values between 0 and 1. 1 being the highest intensity while 0 meaning &amp;#8220;no&amp;#8221; intensity. For the alpha component 0 is transparent and 1 is opaque.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#44&lt;/strong&gt; - Issue the command to clear the colour buffer, thus the screen.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#45&lt;/strong&gt; - Resets the current matrix which is the model view from the &lt;code&gt;onSurfaceChange&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#46&lt;/strong&gt; - We issue a command that creates a translation in the model view matrix. The first parameters says how much to translate on the X axis, the second on the Y axis and the third on the Z axis. As we set up the viewport, X points RIGHT, Y points UP and Z points TOWARDS US out of the screen. So by translating with -5, we tell OpenGL to move INTO the screen 5 units.&lt;/p&gt;
+
+&lt;p&gt;Note that OpenGL does not work with pixels as measures, but with units and fractions of units. We will have to decide how many units an object will have. For example 1 unit in OpenGL can be 1 meter in the real world, so a human can be 1.8 unit tall.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#47&lt;/strong&gt; - Draw &lt;code&gt;triangle1&lt;/code&gt;. It will be drawn 5 units into the screen.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#48&lt;/strong&gt; - We instruct OpenGL to move further 5 units INTO the screen (meaning farther) and 2 units to the right. The translation will be made FROM the last position.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;#49&lt;/strong&gt; - Draw the second triangle (the green one).&lt;/p&gt;
+
+&lt;p&gt;The result will show the scaling of the triangles. The green triangle is the same size as the red one but it appears smaller because it is farther away.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://obviam.github.io/images/archive/2011/06/perspective_projection.png&#34; alt=&#34;Perspective Projection&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;When doing &lt;strong&gt;orthographic projection&lt;/strong&gt;, the Z component is completely ignored and there is no scaling effect.&lt;/p&gt;
+
+&lt;p&gt;The following listing shows the &lt;code&gt;Triangle&lt;/code&gt; used, but you don&amp;rsquo;t have to worry about understanding it, as I will cover the vertex buffers shortly.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f0f0&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0e84b5; font-weight: bold&#34;&gt;Triangle&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+
+  &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; FloatBuffer vertexBuffer&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+  &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; base &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;1.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+  &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; red&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; green&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; blue&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+  &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; vertices&lt;span style=&#34;color: #666666&#34;&gt;[]&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;0.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;0.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt;        &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// V1 - first vertex (x,y,z)&lt;/span&gt;
+           &lt;span style=&#34;color: #40a070&#34;&gt;0.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;0.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt;        &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// V2 - second vertex&lt;/span&gt;
+           &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt;  &lt;span style=&#34;color: #40a070&#34;&gt;0.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;         &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// V3 - third vertex&lt;/span&gt;
+  &lt;span style=&#34;color: #666666&#34;&gt;};&lt;/span&gt;
+  
+  &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;Triangle&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; scale&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; red&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; green&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt; blue&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+    vertices &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;float&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;[]&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+            &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;base &lt;span style=&#34;color: #666666&#34;&gt;*&lt;/span&gt; scale&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;base &lt;span style=&#34;color: #666666&#34;&gt;*&lt;/span&gt; scale&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// V1 - first vertex&lt;/span&gt;
+             base &lt;span style=&#34;color: #666666&#34;&gt;*&lt;/span&gt; scale&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;base &lt;span style=&#34;color: #666666&#34;&gt;*&lt;/span&gt; scale&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// V2 - second vertex&lt;/span&gt;
+               &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt;  base &lt;span style=&#34;color: #666666&#34;&gt;*&lt;/span&gt; scale&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.0f&lt;/span&gt;          &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// V3 - third vertex&lt;/span&gt;
+      &lt;span style=&#34;color: #666666&#34;&gt;};&lt;/span&gt;
+    &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;red&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; red&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;green&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; green&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;blue&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; blue&lt;span style=&#34;color: #666666&#34;&gt;;&lt;/span&gt;
+    ByteBuffer byteBuffer &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; ByteBuffer&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;allocateDirect&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;4&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+    byteBuffer&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;order&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;ByteOrder&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;nativeOrder&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;());&lt;/span&gt;
+    vertexBuffer &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; byteBuffer&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;asFloatBuffer&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+    vertexBuffer&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;put&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;vertices&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+    vertexBuffer&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;flip&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;();&lt;/span&gt;
+  &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+  
+  &lt;span style=&#34;color: #007020; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #902000&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #06287e&#34;&gt;draw&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;GL10 gl&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;{&lt;/span&gt;
+    gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glEnableClientState&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;GL10&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;GL_VERTEX_ARRAY&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// set the colour for the triangle&lt;/span&gt;
+    gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glColor4f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;red&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; green&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; blue&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0.5f&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// Point to our vertex buffer&lt;/span&gt;
+    gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glVertexPointer&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; GL10&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;GL_FLOAT&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; vertexBuffer&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// Draw the vertices as triangle strip&lt;/span&gt;
+    gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glDrawArrays&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;GL10&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;GL_TRIANGLES&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;,&lt;/span&gt; vertices&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;length&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #40a070&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #60a0b0; font-style: italic&#34;&gt;// Disable the client state before leaving&lt;/span&gt;
+    gl&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;glDisableClientState&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;(&lt;/span&gt;GL10&lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #4070a0&#34;&gt;GL_VERTEX_ARRAY&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;);&lt;/span&gt;
+  &lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #666666&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -95,13 +95,13 @@ ga('create', 'UA-17403436-1', 'auto');
             <div class="post-content">
                 <p>Game AI is a very broad subject and while there is a lot of material out there, I didn&rsquo;t find something that introduces the concepts gently and at a slower, more understandable pace. This article will try to explain how to design a very simple but extendable AI system loosely based on the concept of Behaviour Trees.</p>
 
-<h2 id="what-is-ai">What is AI?</h2>
+<h3 id="what-is-ai">What is AI?</h3>
 
 <p>Artificial Intelligence is the human-like behaviour exhibited by the entities participating in the game. It&rsquo;s more the illusion of intelligence and thoughtful action performed by the entities than an actual intelligent reasoning driven behaviour. The goal is to try to fool the player into thinking that the other &#8220;intelligent&#8221; entities are controlled by humans and not by a machine. It&rsquo;s easier said than done, but we can use a lot of tricks to achieve some really good, seemingly random and &#8220;intelligent&#8221; behaviours.</p>
 
 <p></p>
 
-<h2 id="an-example-h3">An Example</h3></h2>
+<h3 id="an-example">An Example</h3>
 
 <p>Before we jump right into the fun bit, let&rsquo;s draft up a plan of what we want to achieve. Again, I will use droids as an example. Imagine an arena where droids will battle it out amongst them and whichever droid is the last one standing is the winner.</p>
 
@@ -213,7 +213,7 @@ There is also an empty <code>update()</code> method which is called each time th
 
 <p>So far this is pretty standard. We can scatter a few droids on the board but they will not do anything. We can create the board, add some droids to it and start calling <code>update()</code>. They are only some dumb droids.</p>
 
-<h2 id="not-so-dumb-droids">Not so Dumb Droids</h2>
+<h3 id="not-so-dumb-droids">Not so Dumb Droids</h3>
 
 <p>To make a droid do something, we could implement the logic in its <code>update()</code> method. This is the method called every tick or in our case every turn. For example we want our droids to wander around the arena (board) and if they see an other droid in range, engage them and start firing at them until they die. This would be a very rudimentary AI but is still a AI.</p>
 
@@ -243,7 +243,7 @@ otherwise pick a random adjacent tile and move there
 
 <p>Let&rsquo;s see if we can come up with a system that can solve these problems.</p>
 
-<h2 id="here-comes-the-brain">Here Comes the Brain</h2>
+<h3 id="here-comes-the-brain">Here Comes the Brain</h3>
 
 <p>We can think of the AI module of the droid as some kind of a brain. The brain is composed of several routines that act on the droid following a set of rules. These rules govern the execution of the routines so it maximises the chances of survival and winning the game as an ultimate goal.</p>
 
@@ -340,7 +340,7 @@ otherwise pick a random adjacent tile and move there
 
 <p>The rest are convenience methods to query the state of the routine.</p>
 
-<h2 id="learning-to-walk">Learning to Walk</h2>
+<h3 id="learning-to-walk">Learning to Walk</h3>
 
 <p>Let&rsquo;s implement the first concrete routine which will be the <code>MoveTo</code> discussed above.</p>
 <div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">MoveTo</span> <span style="color: #007020; font-weight: bold">extends</span> Routine <span style="color: #666666">{</span>
@@ -489,7 +489,7 @@ Droid{name=MyDroid, x=7, y=9, health=10, range=2, damage=1}
 
 <p>This is the first step, but it&rsquo;s not very helpful. Let&rsquo;s say we want to have our droid wander around the board. To achieve this, we will need to execute the <code>MoveTo</code> routine repeatedly, but every time it restarts, the destination needs to be randomly picked.</p>
 
-<h2 id="wandering-about">Wandering About</h2>
+<h3 id="wandering-about">Wandering About</h3>
 
 <p>But let&rsquo;s start with the <code>Wander</code> routine. It&rsquo;s nothing more than a <code>MoveTo</code> but we generate a random destination given that we know the board.</p>
 <div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #007020; font-weight: bold">public</span> <span style="color: #007020; font-weight: bold">class</span> <span style="color: #0e84b5; font-weight: bold">Wander</span> <span style="color: #007020; font-weight: bold">extends</span> Routine <span style="color: #666666">{</span>
@@ -674,7 +674,7 @@ Droid{name=MyDroid, x=6, y=3, health=10, range=2, damage=1}
 
 <p>Notice how the <code>Repeat</code> routine does not end.</p>
 
-<h2 id="assembling-the-intelligence">Assembling the Intelligence</h2>
+<h3 id="assembling-the-intelligence">Assembling the Intelligence</h3>
 
 <p>So far we&rsquo;re just composing behaviours. But what if we want to add decision making to the droids and build a more complex behaviour? Enter the behaviour trees. This term doesn&rsquo;t describe what it is and neither do most of the articles that I found. I&rsquo;ll start with what I want to achieve first and hopefully it will all make sense.</p>
 
@@ -748,7 +748,7 @@ The above tree represents the very basic AI we wanted to implement. Let&rsquo;s 
 
 <p>I won&rsquo;t be implementing all the routines in the article, but you will be able to check out the code on github: <a href="https://github.com/obviam/behavior-trees" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','github.com']);" title="https://github.com/obviam/behavior-trees"><a href="https://github.com/obviam/behavior-trees">https://github.com/obviam/behavior-trees</a></a> and I will be adding more and more routines.</p>
 
-<h2 id="where-to-go-from-here">Where to go from here?</h2>
+<h3 id="where-to-go-from-here">Where to go from here?</h3>
 
 <p>There are quite a few improvements that can be made just by looking at it. As a first step to test the system out, I&rsquo;d move the creation of the routines to a factory for convenience.</p>
 <div class="highlight" style="background: #f0f0f0"><pre style="line-height: 125%"><span></span><span style="color: #60a0b0; font-style: italic">/**</span>
